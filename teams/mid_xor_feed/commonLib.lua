@@ -14,34 +14,68 @@ object.commonLib = {}
 local commonLib = object.commonLib
 
 function commonLib.IsFreeLine(pos1, pos2)
+  BotEcho("freeline check")
   core.DrawDebugLine(pos1, pos2, "yellow")
   local tAllies = core.CopyTable(core.localUnits["AllyUnits"])
   local tEnemies = core.CopyTable(core.localUnits["EnemyCreeps"])
   local distanceLine = Vector3.Distance2DSq(pos1, pos2)
   local x1, x2, y1, y2 = pos1.x, pos2.x, pos1.y, pos2.y
-  local spaceBetween = 50 * 50
+  local reserveWidth = 100*100
+
+  local obstructed = false
+
   for _, ally in pairs(tAllies) do
     local posAlly = ally:GetPosition()
-    local x3, y3 = posAlly.x, posAlly.y
-    local calc = x1*y2 - x2*y1 + x2*y3 - x3*y2 + x3*y1 - x1*y3
-    local calc2 = calc * calc
-    local actual = calc2 / distanceLine
-    if actual < spaceBetween then
-      core.DrawXPosition(posAlly, "red", 25)
-      return false
+    local x0, y0, z0 = posAlly.x, posAlly.y, posAlly.z
+    local U = (x0 - x1)*(x2 - x1) + (y0 - y1)*(y2 - y1)
+    U = U / ((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1))
+    local xc = x1 + (U * (x2 - x1))
+    local yc = y1 + (U * (y2 - y1))
+    local d2 = (x0 - xc)*(x0 - xc) + (y0 - yc)*(y0 - yc)
+
+    local color = "red"
+    if d2 >= reserveWidth then color = "green" end
+    local t = (xc - x1) / (x2 - x1)
+    local between = t < 1 and t > 0
+    if not between then color = "yellow" end
+
+    if d2 < reserveWidth and between then
+      core.DrawDebugLine(Vector3.Create(x0, y0, z0), Vector3.Create(xc, yc, z0), color)
+      core.DrawXPosition(posAlly, color, 25)
+      obstructed = true
+    else
+      core.DrawXPosition(posCreep, color, 25)
+      core.DrawDebugLine(Vector3.Create(x0, y0, z0), Vector3.Create(xc, yc, z0), color)
     end
   end
+
   for _, creep in pairs(tEnemies) do
     local posCreep = creep:GetPosition()
-    local x3, y3 = posCreep.x, posCreep.y
-    local calc = x1*y2 - x2*y1 + x2*y3 - x3*y2 + x3*y1 - x1*y3
-    local calc2 = calc * calc
-    local actual = calc2 / distanceLine
-    if actual < spaceBetween then
-      core.DrawXPosition(posCreep, "red", 25)
-      return false
+    local x0, y0, z0 = posCreep.x, posCreep.y, posCreep.z
+    local U = (x0 - x1)*(x2 - x1) + (y0 - y1)*(y2 - y1)
+    U = U / ((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1))
+    local xc = x1 + (U * (x2 - x1))
+    local yc = y1 + (U * (y2 - y1))
+    local d2 = (x0 - xc)*(x0 - xc) + (y0 - yc)*(y0 - yc)
+
+    local color = "red"
+    if d2 >= reserveWidth then color = "green" end
+    local t = (xc - x1) / (x2 - x1)
+    local between = t < 1 and t > 0
+    if not between then color = "yellow" end
+
+    if d2 < reserveWidth and between then
+      core.DrawDebugLine(Vector3.Create(x0, y0, z0), Vector3.Create(xc, yc, z0), color)
+      core.DrawXPosition(posCreep, color, 25)
+      obstructed = true
+    else 
+      core.DrawDebugLine(Vector3.Create(x0, y0, z0), Vector3.Create(xc, yc, z0), color)
+      core.DrawXPosition(posCreep, color, 25)
     end
   end
+
+  if obstructed then return false end
+
   core.DrawDebugLine(pos1, pos2, "green")
   return true
 end
@@ -93,11 +127,11 @@ local function CourierUseUtility(botBrain)
 
   if #behaviorLib.curItemList == 0 then
     behaviorLib.DetermineBuyState(botBrain)
-    BotEcho("Populating itemlist")
+    --BotEcho("Populating itemlist")
   end
 
   if #behaviorLib.curItemList == 0 then
-    BotEcho("Itemlist empty")
+    --BotEcho("Itemlist empty")
     return 0
   end
 
@@ -132,7 +166,7 @@ local function CourierUseUtility(botBrain)
   --]]
 
   if emptyStashSlots == 0 then 
-    BotEcho("Stash full")
+    --BotEcho("Stash full")
     return 0
   end
 
@@ -140,10 +174,10 @@ local function CourierUseUtility(botBrain)
   while i <= #componentDefs do
     if componentDefs[i]:GetCost() <= botBrain:GetGold() then
       object.courierBuyItem = componentDefs[i]
-      BotEcho("Queueing component "..componentDefs[i]:GetName().." of "..nextItemDef:GetName())
+      --BotEcho("Queueing component "..componentDefs[i]:GetName().." of "..nextItemDef:GetName())
       break
     else
-      BotEcho("Not enough gold: "..componentDefs[i]:GetName().." costs "..componentDefs[i]:GetCost())
+      --BotEcho("Not enough gold: "..componentDefs[i]:GetName().." costs "..componentDefs[i]:GetCost())
     end
     i = i + 1
   end
@@ -153,7 +187,7 @@ local function CourierUseUtility(botBrain)
     return 0
   end
 
-  BotEcho("Item find successful")
+  --BotEcho("Item find successful")
   return 100
 end
 

@@ -14,11 +14,11 @@ object.bAttackCommands = true
 object.bAbilityCommands = true
 object.bOtherCommands = true
 
-object.bReportBehavior = true
+object.bReportBehavior = false
 object.bDebugUtility = false
-object.bDebugExecute = true
+object.bDebugExecute = false
 object.bDebugEchos = false
-object.bDebugLines = false
+object.bDebugLines = true
 
 object.logger = {}
 object.logger.bWriteLog = false
