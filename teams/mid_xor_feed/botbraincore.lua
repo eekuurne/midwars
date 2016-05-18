@@ -9,7 +9,7 @@ local object = _G.object
 
 object.core = object.core or {}
 
-runfile "bots/illusionLib.lua"
+runfile "bots/teams/mid_xor_feed/illusionLib.lua"
 
 local core, eventsLib, behaviorLib, metadata, illusionLib = object.core, object.eventsLib, object.behaviorLib, object.metadata, object.illusionLib
 
