@@ -14,9 +14,9 @@ object.bAttackCommands = true
 object.bAbilityCommands = true
 object.bOtherCommands = true
 
-object.bReportBehavior = false
-object.bDebugUtility = false
-object.bDebugExecute = false
+object.bReportBehavior = true
+object.bDebugUtility = true
+object.bDebugExecute = true
 
 object.logger = {}
 object.logger.bWriteLog = false
@@ -28,11 +28,13 @@ object.metadata = {}
 object.behaviorLib = {}
 object.skills = {}
 
-runfile "bots/core.lua"
-runfile "bots/botbraincore.lua"
-runfile "bots/eventsLib.lua"
-runfile "bots/metadata.lua"
-runfile "bots/behaviorLib.lua"
+runfile "bots/teams/mid_xor_feed/core.lua"
+runfile "bots/teams/mid_xor_feed/behaviorLib.lua"
+runfile "bots/teams/mid_xor_feed/botbraincore.lua"
+runfile "bots/teams/mid_xor_feed/eventsLib.lua"
+runfile "bots/teams/mid_xor_feed/metadata.lua"
+
+runfile "bots/teams/mid_xor_feed/commonLib.lua"
 
 local core, eventsLib, behaviorLib, metadata, skills = object.core, object.eventsLib, object.behaviorLib, object.metadata, object.skills
 
@@ -47,6 +49,9 @@ local Clamp = core.Clamp
 BotEcho('loading monkeyking_main...')
 
 object.heroName = 'Hero_MonkeyKing'
+
+behaviorLib.criticalHealthPercent = 0.33
+behaviorLib.wellUtilityAtCritical = 25
 
 --------------------------------
 -- Lanes
@@ -66,6 +71,7 @@ function object:SkillBuild()
     skills.rock = unitSelf:GetAbility(2)
     skills.ulti = unitSelf:GetAbility(3)
     skills.attributeBoost = unitSelf:GetAbility(4)
+    skills.courier = unitSelf:GetAbility(12)
 
     if skills.dash and skills.pole and skills.rock and skills.ulti and skills.attributeBoost then
       bSkillsValid = true
@@ -91,33 +97,128 @@ function object:SkillBuild()
   end
 end
 
-------------------------------------------------------
---            onthink override                      --
--- Called every bot tick, custom onthink code here  --
-------------------------------------------------------
--- @param: tGameVariables
--- @return: none
-function object:onthinkOverride(tGameVariables)
-  self:onthinkOld(tGameVariables)
+behaviorLib.StartingItems = {"Item_RunesOfTheBlight", "Item_LoggersHatchet", "Item_PretendersCrown"}
+behaviorLib.LaneItems = {"Item_Marchers", "Item_Soulscream"}
+behaviorLib.MidItems = {"Item_EnhancedMarchers", "Item_SolsBulwark"}
+behaviorLib.LateItems = {"Item_Protect", "Item_Strength6", "Item_StrengthAgility"}
 
-  -- custom code here
+local function HarassHeroUtilityOverride(botBrain)
+  local nUtility = 0
+
+  local mana = core.unitSelf:GetMana()
+  local poleUtility = 15
+  local rockUtility = 15
+  local dashUtility = 15
+
+  if skills.dash:CanActivate()  then
+    nUtility = nUtility + dashUtility
+    mana = mana - skills.dash:GetManaCost()
+    if skills.rock:CanActivate() and skills.rock:GetManaCost() < mana then
+      mana = mana - skills.rock:GetManaCost()
+      nUtility = nUtility + rockUtility
+      if skills.pole:CanActivate() and skills.pole:GetManaCost() < mana then
+        nUtility = nUtility + poleUtility
+      end
+    else
+      if skills.pole:CanActivate() and skills.pole:GetManaCost() < mana then
+        nUtility = nUtility + poleUtility
+      end
+    end
+  else 
+    if skills.rock:CanActivate() then
+      mana = mana - skills.rock:GetManaCost()
+      nUtility = nUtility + rockUtility
+      if skills.pole:CanActivate() and skills.pole:GetManaCost() < mana then
+        nUtility = nUtility + poleUtility
+      end
+    else 
+      if skills.pole:CanActivate() then
+        nUtility = nUtility + poleUtility
+      end
+    end
+  end
+
+  return nUtility
 end
-object.onthinkOld = object.onthink
-object.onthink = object.onthinkOverride
 
-----------------------------------------------
---            oncombatevent override        --
--- use to check for infilictors (fe. buffs) --
-----------------------------------------------
--- @param: eventdata
--- @return: none
-function object:oncombateventOverride(EventData)
-  self:oncombateventOld(EventData)
+local function HarassHeroExecuteOverride(botBrain)
+  local unitTarget = behaviorLib.heroTarget
 
-  -- custom code here
+  if unitTarget == nil or not unitTarget:IsValid() then
+    BotEcho("Fail 1")
+    return false --can not execute, move on to the next behavior
+  end
+
+  local unitSelf = core.unitSelf
+
+  local bActionTaken = false
+
+  --since we are using an old pointer, ensure we can still see the target for entity targeting
+  if core.CanSeeUnit(botBrain, unitTarget) then
+    BotEcho("Action action")
+    local dist = Vector3.Distance2D(unitSelf:GetPosition(), unitTarget:GetPosition())
+    local attkRange = core.GetAbsoluteAttackRangeToUnit(unitSelf, unitTarget)
+
+    local dash = skills.dash
+    local pole = skills.pole
+    local stun = skills.rock
+    
+    local facing = core.HeadingDifference(unitSelf, unitTarget:GetPosition())
+
+    if not bActionTaken and stun and stun:CanActivate() and Vector3.Distance2D(unitSelf:GetPosition(), unitTarget:GetPosition()) < 300 and facing < 0.3 then
+      BotEcho("Try to stun")
+      bActionTaken = core.OrderAbility(botBrain, stun)
+    else
+      BotEcho("Did not stun")
+      if not stun then BotEcho("Not stun")
+      else 
+        if not stun:CanActivate() then BotEcho("Cant activate")
+        else 
+          if not (Vector3.Distance2D(unitSelf:GetPosition(), unitTarget:GetPosition()) < 300) then BotEcho("Out of range")
+          else 
+            if not (facing < 0.3) then BotEcho("Bad angle")
+            else 
+              BotEcho("Unknown")
+            end
+          end
+
+        end
+      end
+
+    end
+
+    if not bActionTaken and dash and dash:CanActivate() and Vector3.Distance2D(unitSelf:GetPosition(), unitTarget:GetPosition()) < dash:GetRange() and facing < 0.3 then
+      bActionTaken = core.OrderAbility(botBrain, dash)
+    end
+
+    if not bActionTaken and pole and pole:CanActivate() and Vector3.Distance2D(unitSelf:GetPosition(), unitTarget:GetPosition()) < pole:GetRange() then
+      bActionTaken = core.OrderAbilityEntity(botBrain, pole, unitTarget)
+    end
+
+  end
+
+  if not bActionTaken then
+    BotEcho("Movement action")
+
+    local desiredPos = unitTarget:GetPosition()
+
+    if not bActionTaken and itemGhostMarchers and itemGhostMarchers:CanActivate() then
+      bActionTaken = core.OrderItemClamp(botBrain, unitSelf, itemGhostMarchers)
+    end
+
+    if not bActionTaken and behaviorLib.lastHarassUtil < behaviorLib.diveThreshold then
+      desiredPos = core.AdjustMovementForTowerLogic(desiredPos)
+    end
+
+    --bActionTaken = core.OrderMoveToPosClamp(botBrain, unitSelf, desiredPos, false)
+    
+    if not bActionTaken then 
+      return object.harassExecuteOld(botBrain)
+    end
+  end
+  return true
 end
--- override combat event trigger function.
-object.oncombateventOld = object.oncombatevent
-object.oncombatevent = object.oncombateventOverride
-
-BotEcho('finished loading monkeyking_main')
+object.harassExecuteOld = behaviorLib.HarassHeroBehavior["Execute"]
+behaviorLib.HarassHeroBehavior["Execute"] = HarassHeroExecuteOverride
+behaviorLib.CustomHarassUtility = HarassHeroUtilityOverride
+--behaviorLib.HarassHeroBehavior["Utility"] = HarassHeroUtilityOverride

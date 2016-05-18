@@ -2881,6 +2881,7 @@ function behaviorLib.HealAtWellUtility(botBrain)
 	if botBrain.bDebugUtility == true and nUtility ~= 0 then
 		BotEcho(format("  HealAtWellUtility: %g", nUtility))
 		BotEcho("  " .. behaviorLib.WellHealthUtility(hpPercent) .. " + " .. behaviorLib.WellProximityUtility(nDist) .. " + " .. manaRegenUtility)
+		BotEcho("   at " .. hpPercent .. "% hp")
 	end
        
 	behaviorLib.nLastHealAtWellUtil = nUtility
