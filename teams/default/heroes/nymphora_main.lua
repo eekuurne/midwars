@@ -49,6 +49,13 @@ BotEcho('loading nymphora_main...')
 
 object.heroName = 'Hero_Fairy'
 
+
+behaviorLib.StartingItems = {"Item_ManaBattery", "Item_MinorTotem", "Item_GuardianRing", "Item_CrushingClaws"}
+behaviorLib.LaneItems = {"Item_ManaRegen3", "Item_Marchers", "Item_EnhancedMarchers", "Item_MysticVestments"}
+behaviorLib.MidItems = {"Item_Astrolabe", "Item_MagicArmor2"}
+behaviorLib.LateItems = {"Item_BehemothsHeart"}
+
+
 --------------------------------
 -- Lanes
 --------------------------------
@@ -101,7 +108,6 @@ end
 function object:onthinkOverride(tGameVariables)
   self:onthinkOld(tGameVariables)
 
-  -- custom code here
 end
 object.onthinkOld = object.onthink
 object.onthink = object.onthinkOverride
@@ -122,15 +128,13 @@ object.oncombateventOld = object.oncombatevent
 object.oncombatevent = object.oncombateventOverride
 
 local function HarassHeroExecuteOverride(botBrain)
-
   local unitTarget = behaviorLib.heroTarget
-  if unitTarget == nil then
-    return core.harassExecuteOld(botBrain)
+  if unitTarget == nil or not unitTarget:IsValid() then
+    return false --can not execute, move on to the next behavior
   end
 
   local unitSelf = core.unitSelf
   local nTargetDistanceSq = Vector3.Distance2DSq(unitSelf:GetPosition(), unitTarget:GetPosition())
-  local nLastHarassUtility = behaviorLib.lastHarassUtil
 
   local bActionTaken = false
 
@@ -163,7 +167,7 @@ behaviorLib.CustomHarassUtility = CustomHarassUtilityFnOverride
 
 local function ManaUtility(botBrain)
   local mana = skills.mana
-  if mana:CanActivate() then
+  if mana:CanActivate() and core.unitSelf:GetManaPercent() < 1 then
      return 50
   end
   return 0

@@ -231,7 +231,6 @@ local function DetermineHookTarget(hook)
   for _, unitEnemy in pairs(tLocalEnemies) do
     local enemyPos = unitEnemy:GetPosition()
     local distanceEnemy = Vector3.Distance2DSq(myPos, enemyPos)
-    core.DrawXPosition(enemyPos, "yellow", 50)
     if distanceEnemy < maxDistanceSq then
       if distanceEnemy < distanceTarget and generics.IsFreeLine(myPos, enemyPos) then
         unitTarget = unitEnemy
@@ -249,7 +248,6 @@ local function HookUtility(botBrain)
     local unitTarget = DetermineHookTarget(hook)
     if unitTarget then
       hookTarget = unitTarget:GetPosition()
-      core.DrawXPosition(hookTarget, "green", 50)
       return 60
     end
   end

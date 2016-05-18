@@ -49,6 +49,13 @@ BotEcho('loading monkeyking_main...')
 
 object.heroName = 'Hero_MonkeyKing'
 
+
+behaviorLib.StartingItems = {"Item_ManaBattery", "2 Item_MinorTotem", "Item_HealthPotion", "Item_RunesOfTheBlight"}
+behaviorLib.LaneItems = {"Item_Marchers", "Item_EnhancedMarchers", "Item_PowerSupply"}
+behaviorLib.MidItems = {"Item_SolsBulwark", "Item_Regen", "Item_Protect"}
+behaviorLib.LateItems = {"Item_Immunity", "Item_DaemonicBreastplate", "Item_BehemothsHeart"}
+
+
 --------------------------------
 -- Lanes
 --------------------------------
@@ -159,33 +166,31 @@ object.oncombateventOld = object.oncombatevent
 object.oncombatevent = object.oncombateventOverride
 
 local function PoleTarget(botBrain)
-	local pole = skills.pole
-	local target = nil
-	local distance = 0
-	local myPos = core.unitSelf:GetPosition()
-	local mainPos = core.allyMainBaseStructure:GetPosition()
-	local unitsNearby = core.AssessLocalUnits(botBrain, myPos, pole:GetRange())
-	local fromMain = Vector3.Distance2DSq(myPos, mainPos)
-  	--jos ei omia creeppejä 500 rangella, niin ei aggroa
-  	for id, obj in pairs(unitsNearby.Allies) do
-	  local fromMainObj = Vector3.Distance2DSq(mainPos, obj:GetPosition())
-	  if(fromMainObj < fromMain and fromMainObj > distance and Vector3.Distance2D(myPos, obj:GetPosition()) > 150) then
-	    distance = fromMainObj
-	    target = obj
-	  end 
-	end
-	if target then
-	  core.DrawXPosition(target:GetPosition())
-	end
-	return target
+  local pole = skills.pole
+  local target = nil
+  local distance = 0
+  local myPos = core.unitSelf:GetPosition()
+  local mainPos = core.allyMainBaseStructure:GetPosition()
+  local unitsNearby = core.AssessLocalUnits(botBrain, myPos, pole:GetRange())
+  local fromMain = Vector3.Distance2DSq(myPos, mainPos)
+    --jos ei omia creeppejä 500 rangella, niin ei aggroa
+    for id, obj in pairs(unitsNearby.Allies) do
+    local fromMainObj = Vector3.Distance2DSq(mainPos, obj:GetPosition())
+    if(fromMainObj < fromMain and fromMainObj > distance and Vector3.Distance2D(myPos, obj:GetPosition()) > 150) then
+      distance = fromMainObj
+      target = obj
+    end 
+  end
+
+  return target
 end
 function behaviorLib.CustomRetreatExecute(botBrain)
-	local pole = skills.pole
-	local target = PoleTarget(botBrain)
-	if core.unitSelf:GetHealthPercent() < 0.40 and pole and pole:CanActivate() and target then
-		return core.OrderAbilityEntity(botBrain, pole, target)
-	end
-	return false
+  local pole = skills.pole
+  local target = PoleTarget(botBrain)
+  if core.unitSelf:GetHealthPercent() < 0.40 and pole and pole:CanActivate() and target then
+    return core.OrderAbilityEntity(botBrain, pole, target)
+  end
+  return false
 end
 
 local function CustomHarassUtilityOverride(target)
