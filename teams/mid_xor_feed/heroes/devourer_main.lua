@@ -30,11 +30,11 @@ object.metadata = {}
 object.behaviorLib = {}
 object.skills = {}
 
-runfile "bots/core.lua"
-runfile "bots/botbraincore.lua"
-runfile "bots/eventsLib.lua"
-runfile "bots/metadata.lua"
-runfile "bots/behaviorLib.lua"
+runfile "bots/teams/mid_xor_feed/core.lua"
+runfile "bots/teams/mid_xor_feed/botbraincore.lua"
+runfile "bots/teams/mid_xor_feed/eventsLib.lua"
+runfile "bots/teams/mid_xor_feed/metadata.lua"
+runfile "bots/teams/mid_xor_feed/behaviorLib.lua"
 
 runfile "bots/teams/mid_xor_feed/commonLib.lua"
 
