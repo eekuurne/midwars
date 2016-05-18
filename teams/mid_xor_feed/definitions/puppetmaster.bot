@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bot
-  name="MidXorFeed_PuppetMaster"
-  description="MidXorFeed Puppet Master"
+  name="MidXORFeed_PuppetMaster"
+  description="MidXORFeed Puppet Master"
   heroname="Hero_PuppetMaster"
   rootlua="../heroes/puppetmaster_main.lua"
-  defaultplayername="MidXorFeedPuppetMasterBot"
+  defaultplayername="MidXORFeed PuppetMaster"
   precachepath="/heroes/puppetmaster/"
 />

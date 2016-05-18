@@ -3,7 +3,7 @@ local object = _G.object
 
 runfile 'bots/teambot/teambotbrain.lua'
 
-object.myName = 'MidXorFeed'
+object.myName = 'MidXORFeed'
 
 ------------------------------------------------------
 --            onthink override                      --

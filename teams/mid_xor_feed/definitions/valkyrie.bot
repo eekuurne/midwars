@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bot
-  name="MidXorFeed_Valkyrie"
-  description="MidXorFeed Valkyrie"
+  name="MidXORFeed_Valkyrie"
+  description="MidXORFeed Valkyrie"
   heroname="Hero_Valkyrie"
   rootlua="../heroes/valkyrie_main.lua"
-  defaultplayername="MidXorFeedValkyrieBot"
+  defaultplayername="MidXORFeed Valkyrie"
   precachepath="/heroes/valkyrie/"
 />

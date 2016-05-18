@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bot
-  name="MidXorFeed_MonkeyKing"
-  description="MidXorFeed Monkey King"
+  name="MidXORFeed_MonkeyKing"
+  description="MidXORFeed Monkey King"
   heroname="Hero_MonkeyKing"
   rootlua="../heroes/monkeyking_main.lua"
-  defaultplayername="MidXorFeedMonkeyKingBot"
+  defaultplayername="MidXORFeed MonkeyKing"
   precachepath="/heroes/monkey_king/"
 />
