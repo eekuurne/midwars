@@ -12,6 +12,8 @@ local print, ipairs, pairs, string, table, next, type, tinsert, tremove, tsort, 
 local ceil, floor, pi, tan, atan, atan2, abs, cos, sin, acos, asin, max, random
 	= _G.math.ceil, _G.math.floor, _G.math.pi, _G.math.tan, _G.math.atan, _G.math.atan2, _G.math.abs, _G.math.cos, _G.math.sin, _G.math.acos, _G.math.asin, _G.math.max, _G.math.random
 
+local min = _G.math.max	
+
 local nSqrtTwo = math.sqrt(2)
 
 behaviorLib.tBehaviors = {}
@@ -402,7 +404,7 @@ end
 function behaviorLib.PositionSelfLogic(botBrain)
 	StartProfile("PositionSelfLogic")
 
-	local bDebugEchos = false
+	local bDebugEchos = true
 	
 	--if botBrain.myName == 'ShamanBot' then bDebugEchos = true end
 
@@ -447,7 +449,7 @@ function behaviorLib.PositionSelfLogic(botBrain)
 		StopProfile()
 	end
 		
-	if vecDesiredPos then
+	if not vecDesiredPos then
 		if bDebugEchos then BotEcho("Adjusting PositionSelf for Towers") end
 		
 		local bCanEnterTowerRange = true
@@ -1301,6 +1303,14 @@ function behaviorLib.AttackCreepsUtility(botBrain)
 	
 	local unitTarget = behaviorLib.GetCreepAttackTarget(botBrain, core.unitEnemyCreepTarget, unitDenyTarget)
 	
+	if unitTarget then
+		core.DrawXPosition(unitTarget:GetPosition(), "red", 50)
+	end
+
+	if unitDenyTarget then
+		core.DrawXPosition(unitDenyTarget:GetPosition(), "yellow", 50)
+	end
+
 	if unitTarget then --[[and core.unitSelf:IsAttackReady() then]]
 		if unitTarget:GetTeam() == core.myTeam then
 			nUtility = nDenyVal
@@ -2826,9 +2836,15 @@ function behaviorLib.WellProximityUtility(nDist)
 	return nUtil
 end
  
+behaviorLib.wellManaRegenMinLevel = 5
+behaviorLib.maxWellManaUtility = 7
+behaviorLib.criticalHealthPercent = 0.22
+behaviorLib.wellUtilityAtCritical = 25
+
 function behaviorLib.WellHealthUtility(nHealthPercent)
 	local nHeight = 100
-	local vecCriticalPoint = Vector3.Create(0.30, 25)--up from 0.25,20
+	local vecCriticalPoint = Vector3.Create(behaviorLib.criticalHealthPercent, 
+																				  behaviorLib.wellUtilityAtCritical)
  
 	local nUtil = nHeight / ( (nHeight/vecCriticalPoint.y) ^ (nHealthPercent/vecCriticalPoint.x) )
 	--BotEcho("WellHealthUtil: "..util.."  percent: "..nHealthPercent)
@@ -2836,7 +2852,14 @@ function behaviorLib.WellHealthUtility(nHealthPercent)
 end
  
 behaviorLib.nLastHealAtWellUtil = 0
-behaviorLib.nHealAtWellEmptyManaPoolUtility = 8
+
+function behaviorLib.HealAtWellEmptyManaPoolUtility()
+	if core.unitSelf:GetLevel() < behaviorLib.wellManaRegenMinLevel then
+		return 0
+	else
+		return min(behaviorLib.maxWellManaUtility , HoN.GetMatchTime() / 1000 / 60) 
+	end
+end
 -------- Behavior Fns --------
 function behaviorLib.HealAtWellUtility(botBrain)
 	local nUtility = 0
@@ -2844,17 +2867,20 @@ function behaviorLib.HealAtWellUtility(botBrain)
 	local hpPercent = unitSelf:GetHealthPercent()
 	local mpPercent = unitSelf:GetManaPercent()
  
-	if hpPercent < 0.95 or mpPercent < 0.95 then
-		local vecWellPos = (core.allyWell and core.allyWell:GetPosition()) or Vector3.Create()
-		local nDist = Vector3.Distance2D(vecWellPos, unitSelf:GetPosition())
- 
+	local vecWellPos = (core.allyWell and core.allyWell:GetPosition()) or Vector3.Create()
+	local nDist = Vector3.Distance2D(vecWellPos, unitSelf:GetPosition())
+
+	if hpPercent < 0.95 or mpPercent < 0.95 then 
 		nUtility = behaviorLib.WellHealthUtility(hpPercent) + behaviorLib.WellProximityUtility(nDist)
 	end
+
 	-- add (1 - 0.3%) * 8 for default utility and 30% mana remaining.
-	nUtility = nUtility + (1 - mpPercent) * behaviorLib.nHealAtWellEmptyManaPoolUtility
+	local manaRegenUtility = (1 - mpPercent) * behaviorLib.HealAtWellEmptyManaPoolUtility()
+	nUtility = nUtility + manaRegenUtility
        
 	if botBrain.bDebugUtility == true and nUtility ~= 0 then
 		BotEcho(format("  HealAtWellUtility: %g", nUtility))
+		BotEcho("  " .. behaviorLib.WellHealthUtility(hpPercent) .. " + " .. behaviorLib.WellProximityUtility(nDist) .. " + " .. manaRegenUtility)
 	end
        
 	behaviorLib.nLastHealAtWellUtil = nUtility
@@ -3561,7 +3587,8 @@ Current algorithm:
 	local nextItemDef = behaviorLib.DetermineNextItemDef(botBrain)
 	local bMyTeamHasHuman = core.MyTeamHasHuman()
 	local bBuyTPStone = (core.nDifficulty ~= core.nEASY_DIFFICULTY) or bMyTeamHasHuman
-
+  
+  --[[
 	--For our first frame of this execute
 	if bBuyTPStone and core.GetLastBehaviorName(botBrain) ~= core.GetCurrentBehaviorName(botBrain) then
 		if nextItemDef:GetName() ~= core.idefHomecomingStone:GetName() then		
@@ -3576,6 +3603,7 @@ Current algorithm:
 			nextItemDef = behaviorLib.DetermineNextItemDef(botBrain)
 		end
 	end
+	]]--
 	
 	if behaviorLib.printShopDebug then
 		BotEcho("============ BuyItems ============")
