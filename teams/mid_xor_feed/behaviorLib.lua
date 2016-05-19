@@ -449,7 +449,7 @@ function behaviorLib.PositionSelfLogic(botBrain)
 		StopProfile()
 	end
 		
-	if not vecDesiredPos then
+	if vecDesiredPos then
 		if bDebugEchos then BotEcho("Adjusting PositionSelf for Towers") end
 		
 		local bCanEnterTowerRange = true

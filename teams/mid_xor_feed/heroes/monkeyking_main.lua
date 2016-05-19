@@ -166,25 +166,7 @@ local function HarassHeroExecuteOverride(botBrain)
     local facing = core.HeadingDifference(unitSelf, unitTarget:GetPosition())
 
     if not bActionTaken and stun and stun:CanActivate() and Vector3.Distance2D(unitSelf:GetPosition(), unitTarget:GetPosition()) < 300 and facing < 0.3 then
-      BotEcho("Try to stun")
       bActionTaken = core.OrderAbility(botBrain, stun)
-    else
-      BotEcho("Did not stun")
-      if not stun then BotEcho("Not stun")
-      else 
-        if not stun:CanActivate() then BotEcho("Cant activate")
-        else 
-          if not (Vector3.Distance2D(unitSelf:GetPosition(), unitTarget:GetPosition()) < 300) then BotEcho("Out of range")
-          else 
-            if not (facing < 0.3) then BotEcho("Bad angle")
-            else 
-              BotEcho("Unknown")
-            end
-          end
-
-        end
-      end
-
     end
 
     if not bActionTaken and dash and dash:CanActivate() and Vector3.Distance2D(unitSelf:GetPosition(), unitTarget:GetPosition()) < dash:GetRange() and facing < 0.3 then
