@@ -48,6 +48,11 @@ local Clamp = core.Clamp
 
 BotEcho('loading nymphora_main...')
 
+behaviorLib.StartingItems = {"Item_MinorTotem", "Item_GuardianRing", "Item_CrushingClaws"}
+behaviorLib.LaneItems = {"Item_ManaRegen3", "Item_Marchers", "Item_EnhancedMarchers", "Item_MysticVestments"}
+behaviorLib.MidItems = {"Item_Astrolabe", "Item_MagicArmor2"}
+behaviorLib.LateItems = {"Item_BehemothsHeart"}
+
 object.heroName = 'Hero_Fairy'
 
 --------------------------------
@@ -81,16 +86,42 @@ function object:SkillBuild()
     return
   end
 
-  if skills.ulti:CanLevelUp() then
-    skills.ulti:LevelUp()
-  elseif skills.heal:CanLevelUp() then
-    skills.heal:LevelUp()
-  elseif skills.mana:CanLevelUp() then
-    skills.mana:LevelUp()
-  elseif skills.stun:CanLevelUp() then
-    skills.stun:LevelUp()
-  else
+  local level = unitSelf:GetLevel()
+  local heal = skills.heal
+  local mana = skills.mana
+  local stun = skills.stun
+  local ulti = skills.ulti
+
+  if level == 1 then
+    heal:LevelUp()
+  elseif level == 2 then
+    mana:LevelUp()
+  elseif level == 3 then
+    mana:LevelUp()
+  elseif level == 4 then
+    stun:LevelUp()
+  elseif level == 5 then
+    mana:LevelUp()
+  elseif level == 6 then
+    heal:LevelUp()
+  elseif level == 7 then
+    heal:LevelUp()
+  elseif level == 8 then
+    heal:LevelUp()
+  elseif level == 9 then
+    mana:LevelUp()
+  elseif level == 10 then
+    stun:LevelUp()
+  elseif level == 11 then
+    stun:LevelUp()
+  elseif level == 12 then
+    stun:LevelUp()
+  end
+
+  if skills.attributeBoost:CanLevelUp() then
     skills.attributeBoost:LevelUp()
+  else
+    ulti:LevelUp()
   end
 end
 

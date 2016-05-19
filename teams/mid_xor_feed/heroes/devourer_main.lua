@@ -96,7 +96,7 @@ function object:SkillBuild()
   end
 end
 
-behaviorLib.StartingItems = {"Item_RunesOfTheBlight", "2 Item_MinorTotem", "Item_CrushingClaws", "Item_PretendersCrown"}
+behaviorLib.StartingItems = {"Item_HealthPotion", "2 Item_MinorTotem", "Item_CrushingClaws", "Item_PretendersCrown"}
 behaviorLib.LaneItems = {"Item_Strength5", "2 Item_TrinketOfRestoration", "Item_MysticVestments"}
 behaviorLib.MidItems = {"Item_MagicArmor2", "Item_Marchers", "Item_Striders"}
 behaviorLib.LateItems = {"Item_BehemothsHeart"}
