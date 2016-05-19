@@ -15,7 +15,7 @@ object.bAbilityCommands = true
 object.bOtherCommands = true
 
 object.bReportBehavior = false
-object.bDebugUtility = false
+object.bDebugUtility = true
 object.bDebugExecute = false
 
 object.logger = {}
@@ -28,13 +28,16 @@ object.metadata = {}
 object.behaviorLib = {}
 object.skills = {}
 
-runfile "bots/core.lua"
-runfile "bots/botbraincore.lua"
-runfile "bots/eventsLib.lua"
-runfile "bots/metadata.lua"
-runfile "bots/behaviorLib.lua"
+runfile "bots/teams/mid_xor_feed/core.lua"
+runfile "bots/teams/mid_xor_feed/behaviorLib.lua"
+runfile "bots/teams/mid_xor_feed/botbraincore.lua"
+runfile "bots/teams/mid_xor_feed/eventsLib.lua"
+runfile "bots/teams/mid_xor_feed/metadata.lua"
+
+runfile "bots/teams/mid_xor_feed/commonLib.lua"
 
 local core, eventsLib, behaviorLib, metadata, skills = object.core, object.eventsLib, object.behaviorLib, object.metadata, object.skills
+local commonLib = object.commonLib
 
 local print, ipairs, pairs, string, table, next, type, tinsert, tremove, tsort, format, tostring, tonumber, strfind, strsub
   = _G.print, _G.ipairs, _G.pairs, _G.string, _G.table, _G.next, _G.type, _G.table.insert, _G.table.remove, _G.table.sort, _G.string.format, _G.tostring, _G.tonumber, _G.string.find, _G.string.sub
@@ -47,6 +50,16 @@ local Clamp = core.Clamp
 BotEcho('loading puppetmaster_main...')
 
 object.heroName = 'Hero_PuppetMaster'
+
+behaviorLib.criticalHealthPercent = 0.33
+behaviorLib.wellUtilityAtCritical = 30
+behaviorLib.wellManaRegenMinLevel = 6
+behaviorLib.maxWellManaUtility = 2
+
+behaviorLib.StartingItems = {"Item_HealthPotion", "Item_PretendersCrown", "2 Item_MinorTotem", "Item_MarkOfTheNovice"}
+behaviorLib.LaneItems = {"Item_Marchers", "Item_Intelligence5"}
+behaviorLib.MidItems = {"Item_Steamboots", "Item_WhisperingHelm"}
+behaviorLib.LateItems = {"Item_Protect"}
 
 --------------------------------
 -- Lanes
@@ -66,6 +79,7 @@ function object:SkillBuild()
     skills.whip = unitSelf:GetAbility(2)
     skills.ulti = unitSelf:GetAbility(3)
     skills.attributeBoost = unitSelf:GetAbility(4)
+    skills.courier = unitSelf:GetAbility(12)
 
     if skills.hold and skills.show and skills.whip and skills.ulti and skills.attributeBoost then
       bSkillsValid = true
@@ -91,6 +105,148 @@ function object:SkillBuild()
   end
 end
 
+local function HarassHeroUtilityOverride(botBrain)
+  local nUtility = 0
+
+  local mana = core.unitSelf:GetMana()
+  local holdUtility = 10
+  local ultiUtility = 40
+  local showUtility = 10
+
+  if skills.ulti:CanActivate()  then
+    nUtility = nUtility + ultiUtility
+    mana = mana - skills.ulti:GetManaCost()
+    if skills.hold:CanActivate() and skills.hold:GetManaCost() < mana then
+      mana = mana - skills.hold:GetManaCost()
+      nUtility = nUtility + holdUtility
+      if skills.show:CanActivate() and skills.show:GetManaCost() < mana then
+        nUtility = nUtility + showUtility
+      end
+    else
+      if skills.show:CanActivate() and skills.show:GetManaCost() < mana then
+        nUtility = nUtility + showUtility
+      else
+        -- cannot ult and disable
+        nUtility = nUtility - ultiUtility
+      end
+    end
+  else 
+    if skills.hold:CanActivate() then
+      mana = mana - skills.hold:GetManaCost()
+      nUtility = nUtility + holdUtility
+      if skills.show:CanActivate() and skills.show:GetManaCost() < mana then
+        nUtility = nUtility + showUtility
+      end
+    else 
+      if skills.show:CanActivate() then
+        nUtility = nUtility + showUtility
+      end
+    end
+  end
+
+  -- a puppet is placed
+  if behaviorLib.heroTargetOverride then
+    BotEcho("Exists puppet! extra utility for harass!")
+    nUtility = nUtility + 40
+  end
+
+  local unitTarget = behaviorLib.heroTarget
+
+
+
+  if unitTarget then
+
+    if commonLib.IsDisabled(unitTarget) then
+      BotEcho("Enemy disabled! extra utility for harass!")
+      nUtility = nUtility + 30
+    end
+
+    local s = commonLib.RelativeTowerPosition(unitTarget)
+    if s == 1 then 
+      nUtility = nUtility * 1.4
+    end
+    if s == -1 then 
+      nUtility = nUtility / 1.4
+    end
+
+    if unitTarget:GetMana() > core.unitSelf:GetMana() then 
+      nUtility = nUtility / 1.2
+    else 
+      nUtility = nUtility * 1.2
+    end
+  end
+
+  return nUtility
+end
+
+local function HarassHeroExecuteOverride(botBrain)
+  local unitTarget = behaviorLib.heroTarget
+
+  if unitTarget == nil or not unitTarget:IsValid() then
+    return false --can not execute, move on to the next behavior
+  end
+
+  local unitSelf = core.unitSelf
+
+  local bActionTaken = false
+
+  --
+  -- Use abilities
+  --
+  --since we are using an old pointer, ensure we can still see the target for entity targeting
+  if core.CanSeeUnit(botBrain, unitTarget) then
+    local dist = Vector3.Distance2D(unitSelf:GetPosition(), unitTarget:GetPosition())
+    local attkRange = core.GetAbsoluteAttackRangeToUnit(unitSelf, unitTarget)
+
+    local hold = skills.hold
+    local ulti = skills.ulti
+    local show = skills.show
+    
+    local facing = core.HeadingDifference(unitSelf, unitTarget:GetPosition())
+
+    local targetDisabled = commonLib.IsDisabled(unitTarget)
+
+    if not bActionTaken and ulti and targetDisabled and ulti:CanActivate() and 
+      Vector3.Distance2D(unitSelf:GetPosition(), unitTarget:GetPosition()) < ulti:GetRange() then
+      bActionTaken = core.OrderAbilityEntity(botBrain, ulti, unitTarget)
+    end
+
+    if not bActionTaken and hold and not targetDisabled and hold:CanActivate() and 
+      Vector3.Distance2D(unitSelf:GetPosition(), unitTarget:GetPosition()) < hold:GetRange() then
+      bActionTaken = core.OrderAbilityEntity(botBrain, hold, unitTarget)
+    end
+
+    if not bActionTaken and show and not targetDisabled and show:CanActivate() and 
+      Vector3.Distance2D(unitSelf:GetPosition(), unitTarget:GetPosition()) < show:GetRange() then
+      bActionTaken = core.OrderAbilityEntity(botBrain, show, unitTarget)
+    end
+  end
+
+  if not bActionTaken then
+
+    local desiredPos = unitTarget:GetPosition()
+
+    if not bActionTaken and itemGhostMarchers and itemGhostMarchers:CanActivate() then
+      bActionTaken = core.OrderItemClamp(botBrain, unitSelf, itemGhostMarchers)
+    end
+
+    if not bActionTaken and behaviorLib.lastHarassUtil < behaviorLib.diveThreshold then
+      desiredPos = core.AdjustMovementForTowerLogic(desiredPos)
+    end
+
+    --bActionTaken = core.OrderMoveToPosClamp(botBrain, unitSelf, desiredPos, false)
+    
+    if not bActionTaken then 
+      return object.harassExecuteOld(botBrain)
+    end
+  end
+  return true
+end
+
+object.harassExecuteOld = behaviorLib.HarassHeroBehavior["Execute"]
+behaviorLib.HarassHeroBehavior["Execute"] = HarassHeroExecuteOverride
+behaviorLib.CustomHarassUtility = HarassHeroUtilityOverride
+
 ------------------------------------------------------
 --            onthink override                      --
 -- Called every bot tick, custom onthink code here  --
@@ -99,6 +255,22 @@ end
 -- @return: none
 function object:onthinkOverride(tGameVariables)
   self:onthinkOld(tGameVariables)
+
+  local enemies = core.localUnits['EnemyUnits']
+
+  local overrideTarget = false
+
+  for i, unit in pairs(enemies) do
+
+    if unit:GetTypeName() == "Pet_PuppetMaster_Ability4" and unit:GetTeam() ~= core.unitSelf:GetTeam() then
+      behaviorLib.heroTargetOverride = unit
+      overrideTarget = true
+    end
+  end 
+
+  if not overrideTarget then 
+    behaviorLib.heroTargetOverride = nil
+  end
 
   -- custom code here
 end
@@ -111,10 +283,19 @@ object.onthink = object.onthinkOverride
 ----------------------------------------------
 -- @param: eventdata
 -- @return: none
+
+function printObjects(objects)
+  for i, obj in pairs(objects) do
+    BotEcho(obj:GetDisplayName().." "..obj:GetTypeName())
+  end
+end
+
+function Starts(string, start) 
+  return string.sub(string, 1, string.len(start)) == start
+end
+
 function object:oncombateventOverride(EventData)
   self:oncombateventOld(EventData)
-
-  -- custom code here
 end
 -- override combat event trigger function.
 object.oncombateventOld = object.oncombatevent

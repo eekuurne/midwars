@@ -42,6 +42,10 @@ function commonLib.RelativeTowerPosition(enemyTarget)
 
 end
 
+function commonLib.IsDisabled(enemyTarget)
+  return enemyTarget:IsStunned() or enemyTarget:IsImmobilized() or enemyTarget:IsPerplexed()
+end
+
 function commonLib.IsFreeLine(pos1, pos2)
   BotEcho("freeline check")
   core.DrawDebugLine(pos1, pos2, "yellow")
