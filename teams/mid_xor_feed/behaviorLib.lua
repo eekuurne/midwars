@@ -1785,6 +1785,9 @@ function behaviorLib.HarassHeroExecute(botBrain)
 
 	local unitSelf = core.unitSelf
 	local unitTarget = behaviorLib.heroTarget
+	if behaviorLib.heroTargetOverride then
+		unitTarget = behaviorLib.heroTargetOverride
+	end
 	local vecTargetPos = (unitTarget and unitTarget:GetPosition()) or nil
 
 	if bDebugEchos then BotEcho("Harassing "..((unitTarget~=nil and unitTarget:GetTypeName()) or "nil")) end
