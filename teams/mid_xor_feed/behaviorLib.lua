@@ -404,7 +404,7 @@ end
 function behaviorLib.PositionSelfLogic(botBrain)
 	StartProfile("PositionSelfLogic")
 
-	local bDebugEchos = true
+	local bDebugEchos = false
 	
 	--if botBrain.myName == 'ShamanBot' then bDebugEchos = true end
 
@@ -2820,7 +2820,7 @@ tinsert(behaviorLib.tBehaviors, behaviorLib.RetreatFromThreatBehavior)
 ----------------------------------
  
 function behaviorLib.WellProximityUtility(nDist)
-	local nMaxVal = 15
+	local nMaxVal = 10
 	local nFarX = 8000
  
 	local nUtil = 0

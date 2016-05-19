@@ -7,11 +7,40 @@ local print, ipairs, pairs, string, table, next, type, tinsert, tremove, tsort, 
   = _G.print, _G.ipairs, _G.pairs, _G.string, _G.table, _G.next, _G.type, _G.table.insert, _G.table.remove, _G.table.sort, _G.string.format, _G.tostring, _G.tonumber, _G.string.find, _G.string.sub
 local ceil, floor, pi, tan, atan, atan2, abs, cos, sin, acos, max, random
   = _G.math.ceil, _G.math.floor, _G.math.pi, _G.math.tan, _G.math.atan, _G.math.atan2, _G.math.abs, _G.math.cos, _G.math.sin, _G.math.acos, _G.math.max, _G.math.random
+local min = _G.math.min
 
 local BotEcho, VerboseLog, BotLog, Clamp = core.BotEcho, core.VerboseLog, core.BotLog, core.Clamp
 
 object.commonLib = {}
 local commonLib = object.commonLib
+
+-- return -1 if enemy tower in range, 1 if ally tower, 0 if neither
+function commonLib.RelativeTowerPosition(enemyTarget)
+  local enemyTowers = core.localUnits['EnemyTowers']
+  local allyTowers = core.localUnits['AllyTowers']
+
+  local enemyDist = 99999
+  local allyDist = 99999
+
+  for i, tower in pairs(enemyTowers) do
+    enemyDist = min(enemyDist, Vector3.Distance2D(enemyTarget:GetPosition(), tower:GetPosition()))
+  end
+
+  for i, tower in pairs(allyTowers) do
+    allyDist = min(allyDist, Vector3.Distance2D(enemyTarget:GetPosition(), tower:GetPosition()))
+  end
+
+  if enemyDist == allyDist then
+    return 0
+  end
+
+  if enemyDist < allyDist then
+    return -1
+  end
+
+  return 1
+
+end
 
 function commonLib.IsFreeLine(pos1, pos2)
   BotEcho("freeline check")
@@ -195,19 +224,21 @@ local function CourierUseExecute(botBrain)
 
   if not object.courierBuyItem then return false end
 
+  courier = object.skills.courier
+
   BotEcho("Buying "..object.courierBuyItem:GetName())
 
   core.unitSelf:PurchaseRemaining(object.courierBuyItem)
   object.courierBuyItem = nil  
 
-  if not skills.courier:CanActivate() then
+  if not courier:CanActivate() then
     if courierDebug then
       BotEcho("Cannot use courier")
     end
     return 0
   end
 
-  return core.OrderAbility(botBrain, skills.courier)
+  return core.OrderAbility(botBrain, courier)
 end
 
 CourierUseBehavior["Utility"] = CourierUseUtility

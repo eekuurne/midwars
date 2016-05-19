@@ -14,9 +14,9 @@ object.bAttackCommands = true
 object.bAbilityCommands = true
 object.bOtherCommands = true
 
-object.bReportBehavior = true
+object.bReportBehavior = false
 object.bDebugUtility = true
-object.bDebugExecute = true
+object.bDebugExecute = false
 
 object.logger = {}
 object.logger.bWriteLog = false
@@ -37,6 +37,7 @@ runfile "bots/teams/mid_xor_feed/metadata.lua"
 runfile "bots/teams/mid_xor_feed/commonLib.lua"
 
 local core, eventsLib, behaviorLib, metadata, skills = object.core, object.eventsLib, object.behaviorLib, object.metadata, object.skills
+local commonLib = object.commonLib
 
 local print, ipairs, pairs, string, table, next, type, tinsert, tremove, tsort, format, tostring, tonumber, strfind, strsub
   = _G.print, _G.ipairs, _G.pairs, _G.string, _G.table, _G.next, _G.type, _G.table.insert, _G.table.remove, _G.table.sort, _G.string.format, _G.tostring, _G.tonumber, _G.string.find, _G.string.sub
@@ -50,8 +51,10 @@ BotEcho('loading monkeyking_main...')
 
 object.heroName = 'Hero_MonkeyKing'
 
-behaviorLib.criticalHealthPercent = 0.33
-behaviorLib.wellUtilityAtCritical = 25
+behaviorLib.criticalHealthPercent = 0.30
+behaviorLib.wellUtilityAtCritical = 22
+behaviorLib.wellManaRegenMinLevel = 6
+behaviorLib.maxWellManaUtility = 2
 
 --------------------------------
 -- Lanes
@@ -98,7 +101,7 @@ function object:SkillBuild()
 end
 
 behaviorLib.StartingItems = {"Item_RunesOfTheBlight", "Item_LoggersHatchet", "Item_PretendersCrown"}
-behaviorLib.LaneItems = {"Item_Marchers", "Item_Soulscream"}
+behaviorLib.LaneItems = {"Item_Marchers", "Item_DuckBoots", "Item_Soulscream"}
 behaviorLib.MidItems = {"Item_EnhancedMarchers", "Item_SolsBulwark"}
 behaviorLib.LateItems = {"Item_Protect", "Item_Strength6", "Item_StrengthAgility"}
 
@@ -106,9 +109,9 @@ local function HarassHeroUtilityOverride(botBrain)
   local nUtility = 0
 
   local mana = core.unitSelf:GetMana()
-  local poleUtility = 15
-  local rockUtility = 15
-  local dashUtility = 15
+  local poleUtility = 10
+  local rockUtility = 10
+  local dashUtility = 10
 
   if skills.dash:CanActivate()  then
     nUtility = nUtility + dashUtility
@@ -137,6 +140,25 @@ local function HarassHeroUtilityOverride(botBrain)
       end
     end
   end
+
+  local unitTarget = behaviorLib.heroTarget
+  if unitTarget then
+    local s = commonLib.RelativeTowerPosition(unitTarget)
+    if s == 1 then 
+      nUtility = nUtility * 1.4
+    end
+    if s == -1 then 
+      nUtility = nUtility / 1.4
+    end
+
+    if unitTarget:GetMana() > core.unitSelf:GetMana() then 
+      nUtility = nUtility / 1.2
+    else 
+      nUtility = nUtility * 1.2
+    end
+  end
+
+  BotEcho("============ "..nUtility.." ============")
 
   return nUtility
 end
