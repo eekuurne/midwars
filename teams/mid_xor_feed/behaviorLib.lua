@@ -2145,18 +2145,20 @@ function behaviorLib.PushExecute(botBrain)
 	local bActionTaken = false
 
 	--Turn on Ring of the Teacher if we have it
-	if bActionTaken == false then
-		local itemRoT = core.itemRoT
-		
-		if itemRoT then
-			itemRoT:Update()
-			
-			if itemRoT.bHeroesOnly then			
-				if bDebugEchos then BotEcho("Turning on RoTeacher") end
-				bActionTaken = core.OrderItemClamp(botBrain, unitSelf, core.itemRoT)
-			end
-		end
-	end
+	--[[
+			if bActionTaken == false then
+				BotEcho("wat")
+				local itemRoT = core.itemRoT
+				
+				if itemRoT then
+					itemRoT:Update()
+					
+					if itemRoT.bHeroesOnly then			
+						if bDebugEchos then BotEcho("Turning on RoTeacher") end
+						bActionTaken = core.OrderItemClamp(botBrain, unitSelf, core.itemRoT)
+					end
+				end
+			end]]
 	
 	--Attack creeps if we're in range
 	if bActionTaken == false then
@@ -2412,17 +2414,19 @@ function behaviorLib.PositionSelfExecute(botBrain)
 	end
 	
 	--Turn off Ring of the Teacher if we have it
-	local itemRoT = core.itemRoT
-	if itemRoT then
-		itemRoT:Update()
-		
-		if not itemRoT.bHeroesOnly then
-			local bSuccess = core.OrderItemClamp(botBrain, unitSelf, core.itemRoT)
-			if bSuccess then
-				return
-			end
-		end
-	end
+	--[[
+			local itemRoT = core.itemRoT
+			if itemRoT then
+				BotEcho("wot")
+				itemRoT:Update()
+				
+				if not itemRoT.bHeroesOnly then
+					local bSuccess = core.OrderItemClamp(botBrain, unitSelf, core.itemRoT)
+					if bSuccess then
+						return
+					end
+				end
+			end]]
 	
 	local vecDesiredPos = vecMyPosition
 	local unitTarget = nil
