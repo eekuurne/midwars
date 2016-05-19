@@ -250,11 +250,27 @@ local function CourierUseUtility(botBrain)
   local i = 1
   while i <= #componentDefs do
     local componentDef = componentDefs[i]
-    if componentDef:GetCost() <= botBrain:GetGold() then
-      object.courierBuyItem = componentDef
-      BotEcho("Queueing component "..componentDef:GetName().." of "..nextItemDef:GetName())
-      BotEcho("Cost: "..componentDef:GetCost().." Gold: "..botBrain:GetGold())
-      break
+    if componentDef:GetCost() == 0 then
+      subComponentDefs = core.unitSelf:GetItemComponentsRemaining(componentDef)
+      local j = 1
+      while j <= #subComponentDefs do
+        local subComponentDef = subComponentDefs[i]
+          if subComponentDef:GetCost() <= botBrain:GetGold() then
+            object.courierBuyItem = subComponentDef
+            BotEcho("Queueing component "..subComponentDef:GetName()..
+                    " of "..componentDef:GetName().." of "..nextItemDef:GetName())
+            BotEcho("Cost: "..subComponentDef:GetCost().." Gold: "..botBrain:GetGold())
+            break
+          end  
+          j = j + 1
+      end
+    else 
+      if componentDef:GetCost() <= botBrain:GetGold() then
+        object.courierBuyItem = componentDef
+        BotEcho("Queueing component "..componentDef:GetName().." of "..nextItemDef:GetName())
+        BotEcho("Cost: "..componentDef:GetCost().." Gold: "..botBrain:GetGold())
+        break
+      end
     end
 
     if object.courierBuyItem then break end
