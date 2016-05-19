@@ -1,7 +1,7 @@
 local _G = getfenv(0)
 local object = _G.object
 
-runfile 'bots/teambot/teambotbrain.lua'
+runfile 'bots/teams/mid_xor_feed/teambotbrain.lua'
 
 object.myName = 'MidXORFeed'
 
