@@ -51,9 +51,9 @@ BotEcho('loading valkyrie_main...')
 object.heroName = 'Hero_Valkyrie'
 
 
-behaviorLib.StartingItems = {"Item_MinorTotem", "Item_PretendersCrown", "Item_TrinketOfRestoration"}
-behaviorLib.LaneItems = {"Item_MysticPotpourri", "Item_CrushingClaws", "Item_Strength5", "Item_Astrolabe", "Item_Marchers"}
-behaviorLib.MidItems = {"Item_EnhancedMarchers", "Item_Sicarius", "Item_ManaBurn1", "Item_ManaBurn2"}
+behaviorLib.StartingItems = {"2 Item_MinorTotem", "Item_PretendersCrown", "Item_MarkOfTheNovice", "Item_Intelligence5"}
+behaviorLib.LaneItems = {"Item_Replenish", "Item_PretendersCrown", "Item_TrinketOfRestoration", "Item_MysticPotpourri", "Item_CrushingClaws", "Item_Strength5", "Item_Astrolabe"}
+behaviorLib.MidItems = {"Item_Marchers", "Item_EnhancedMarchers", "Item_Sicarius", "Item_ManaBurn1", "Item_ManaBurn2"}
 behaviorLib.LateItems = {"Item_Immunity", "Item_BehemothsHeart"}
 
 
@@ -88,10 +88,12 @@ function object:SkillBuild()
     return
   end
 
-  if skills.javelin:CanLevelUp() and unitSelf:GetLevel() == 4 then
+  if skills.javelin:CanLevelUp() and unitSelf:GetLevel() == 6 then
     skills.javelin:LevelUp()
   elseif skills.leap:CanLevelUp() and unitSelf:GetLevel() == 1 then
     skills.leap:LevelUp()
+    elseif skills.attributeBoost:CanLevelUp() and unitSelf:GetLevel() == 4 then
+    skills.attributeBoost:LevelUp()
   elseif skills.call:CanLevelUp() then
     skills.call:LevelUp()
   elseif skills.javelin:CanLevelUp() then
@@ -117,16 +119,16 @@ function object:onthinkOverride(tGameVariables)
   local unitSelf = self.core.unitSelf
 
   if unitSelf:GetLevel() > 3 then
-    behaviorLib.criticalHealthPercent = 0.23
-    behaviorLib.wellUtilityAtCritical = 26
+    behaviorLib.criticalHealthPercent = 0.24
+    behaviorLib.wellUtilityAtCritical = 32
   elseif unitSelf:GetLevel() > 5 then
-    behaviorLib.maxWellManaUtility = 8
-    behaviorLib.criticalHealthPercent = 0.25
-    behaviorLib.wellUtilityAtCritical = 28
+    behaviorLib.maxWellManaUtility = 14
+    behaviorLib.criticalHealthPercent = 0.30
+    behaviorLib.wellUtilityAtCritical = 56
   elseif unitSelf:GetLevel() > 7 then
-    behaviorLib.maxWellManaUtility = 9
-    behaviorLib.criticalHealthPercent = 0.27
-    behaviorLib.wellUtilityAtCritical = 30
+    behaviorLib.maxWellManaUtility = 28
+    behaviorLib.criticalHealthPercent = 0.41
+    behaviorLib.wellUtilityAtCritical = 66
   end
 
   -- custom code here
@@ -164,7 +166,7 @@ function behaviorLib.CustomRetreatExecute(botBrain)
   local unitSelf = core.unitSelf
   local unitsNearby = core.AssessLocalUnits(botBrain, unitSelf:GetPosition(), 500)
 
-  if unitSelf:GetHealthPercent() < 0.3 and core.NumberElements(unitsNearby.EnemyHeroes) > 0 then
+  if unitSelf:GetHealthPercent() < 0.4 and core.NumberElements(unitsNearby.EnemyHeroes) > 0 then
     local ulti = skills.ulti
     if ulti and ulti:CanActivate() then
       return core.OrderAbility(botBrain, ulti)
@@ -201,7 +203,11 @@ local function HarassHeroExecuteOverride(botBrain)
   local bActionTaken = false
 
   local call = skills.call
-  if call and call:CanActivate() and Vector3.Distance2D(unitTarget:GetPosition(), unitSelf:GetPosition()) < 650 then
+  if call and call:CanActivate() and Vector3.Distance2D(unitTarget:GetPosition(), unitSelf:GetPosition()) < 200 then
+    bActionTaken = core.OrderAbility(botBrain, call)
+  end
+
+  if call and call:CanActivate() and Vector3.Distance2D(unitTarget:GetPosition(), unitSelf:GetPosition()) < 600 and unitTarget:GetHealthPercent() < 0.6 then
     bActionTaken = core.OrderAbility(botBrain, call)
   end
 
@@ -268,6 +274,45 @@ ArrowBehavior["Execute"] = ArrowExecute
 ArrowBehavior["Name"] = "Arrowing"
 tinsert(behaviorLib.tBehaviors, ArrowBehavior)
 
+local itemAstro = nil
+local itemManaring = nil
+local FindItemsOld = core.FindItems
+local function FindItemsFn(botBrain)
+  FindItemsOld(botBrain)
+  if itemAstro then
+    return
+  end
+  local unitSelf = core.unitSelf
+  local inventory = unitSelf:GetInventory(false)
+  if inventory ~= nil then
+    for slot = 1, 6, 1 do
+      local curItem = inventory[slot]
+      if curItem and not curItem:IsRecipe() then
+        if not itemAstro and curItem:GetName() == "Item_Astrolabe" then
+          itemAstro = core.WrapInTable(curItem)
+        end
+      end
+    end
+  end
+  if itemManaring then
+    return
+  end
+  local unitSelf = core.unitSelf
+  local inventory = unitSelf:GetInventory(false)
+  if inventory ~= nil then
+    for slot = 1, 6, 1 do
+      local curItem = inventory[slot]
+      if curItem and not curItem:IsRecipe() then
+        if not itemManaring and curItem:GetName() == "Item_Replenish" then
+          itemManaring = core.WrapInTable(curItem)
+        end
+      end
+    end
+  end
+end
+core.FindItems = FindItemsFn
+
+
 local CallPushBehavior = {}
 local function CallPushUtility(botBrain)
   local nUtility = 0;
@@ -276,6 +321,7 @@ local function CallPushUtility(botBrain)
   local tEnemies = core.CopyTable(core.localUnits["EnemyCreeps"])
   local enemyCreepsInRange = 0
   local siegeOnLane = false
+  local totalHealthLost = 0
   
   local call = skills.call
   if call and call:CanActivate() then
@@ -284,8 +330,17 @@ local function CallPushUtility(botBrain)
 
       if typeAlly == "Creep_LegionSiege" or typeAlly == "Creep_HellbourneSiege" then
         siegeOnLane = true
+      else
+        totalHealthLost = totalHealthLost + ally:GetMaxHealth() - ally:GetHealth()
       end
+
     end
+
+    if totalHealthLost > 330 and siegeOnLane == true and itemAstro and itemAstro:CanActivate() then
+      BotEcho('Use meka!!!')
+      bActionTaken = core.OrderItemClamp(botBrain, unitSelf, itemAstro)
+    end
+
 
     for _, creep in pairs(tEnemies) do
       local typeCreep = creep:GetTypeName()
@@ -294,7 +349,7 @@ local function CallPushUtility(botBrain)
         siegeOnLane = true
       end
 
-      if siegeOnLane == true and typeCreep ~= "Creep_LegionSiege" and typeCreep ~= "Creep_HellbourneSiege" then
+      if typeCreep ~= "Creep_LegionSiege" and typeCreep ~= "Creep_HellbourneSiege" then
         if Vector3.Distance2D(creep:GetPosition(), unitSelf:GetPosition()) < 600 then
           enemyCreepsInRange = enemyCreepsInRange + 1
         end 
@@ -302,8 +357,12 @@ local function CallPushUtility(botBrain)
     end
   end
 
-  if enemyCreepsInRange > 2 then
+  if enemyCreepsInRange > 2 and siegeOnLane == true then
     nUtility = nUtility + 50
+  end
+
+  if itemManaring and enemyCreepsInRange > 3 then
+    nUtility = nUtility + 40
   end
 
   return nUtility
@@ -320,5 +379,85 @@ CallPushBehavior["Utility"] = CallPushUtility
 CallPushBehavior["Execute"] = CallPushExecute
 CallPushBehavior["Name"] = "Call push"
 tinsert(behaviorLib.tBehaviors, CallPushBehavior)
+
+local AstrolabeBehavior = {}
+local function AstrolabeUtility(botBrain)
+  local nUtility = 0;
+  local unitSelf = core.unitSelf
+  local tAllies = core.CopyTable(core.localUnits["AllyUnits"])
+  local siegeOnLane = false
+  local totalHealthLost = 0
+  
+  for _, ally in pairs(tAllies) do
+    local typeAlly = ally:GetTypeName()
+
+    if typeAlly == "Creep_LegionSiege" or typeAlly == "Creep_HellbourneSiege" then
+      siegeOnLane = true
+    else
+      totalHealthLost = totalHealthLost + ally:GetMaxHealth() - ally:GetHealth()
+    end
+
+    if totalHealthLost > 333 and siegeOnLane == true then
+      nUtility = nUtility + 55
+    end
+
+  end
+  return nUtility
+end
+local function AstrolabeExecute(botBrain)
+  if itemAstro and itemAstro:CanActivate() then
+    return core.OrderItemClamp(botBrain, unitSelf, itemAstro)
+  end
+  return false
+end
+AstrolabeBehavior["Utility"] = AstrolabeUtility
+AstrolabeBehavior["Execute"] = AstrolabeExecute
+AstrolabeBehavior["Name"] = "Astrolabe"
+tinsert(behaviorLib.tBehaviors, AstrolabeBehavior)
+
+local ManaringBehavior = {}
+local function ManaringUtility(botBrain)
+  local nUtility = 0;
+  local unitSelf = core.unitSelf
+  
+  if (unitSelf:GetMaxMana() - unitSelf:GetMana()) > 135 then
+    nUtility = nUtility + 45
+  end
+  return nUtility
+end
+local function ManaringExecute(botBrain)
+  if itemManaring and itemManaring:CanActivate() then
+    return core.OrderItemClamp(botBrain, unitSelf, itemManaring)
+  end
+  return false
+end
+ManaringBehavior["Utility"] = ManaringUtility
+ManaringBehavior["Execute"] = ManaringExecute
+ManaringBehavior["Name"] = "Manaring"
+tinsert(behaviorLib.tBehaviors, ManaringBehavior)
+
+local LeapBehavior = {}
+local function LeapUtility(botBrain)
+  local nUtility = 0;
+  local unitSelf = core.unitSelf
+  
+  local angle = core.HeadingDifference(unitSelf, core.allyMainBaseStructure:GetPosition())
+  local leap = skills.leap
+  if unitSelf:GetHealthPercent() < 0.2 and angle < 0.5 then
+    nUtility = nUtility + 95
+  end
+  
+  return nUtility
+end
+local function LeapExecute(botBrain)
+  if leap and leap:CanActivate() then
+    return core.OrderAbility(botBrain, leap)
+  end
+  return false
+end
+LeapBehavior["Utility"] = LeapUtility
+LeapBehavior["Execute"] = LeapExecute
+LeapBehavior["Name"] = "Leap escape"
+tinsert(behaviorLib.tBehaviors, LeapBehavior)
 
 BotEcho('finished loading valkyrie_main')
