@@ -109,6 +109,48 @@ function commonLib.IsFreeLine(pos1, pos2)
   return true
 end
 
+function commonLib.IsFreeLineNoAllies(pos1, pos2)
+  BotEcho("freeline check")
+  core.DrawDebugLine(pos1, pos2, "yellow")
+  local tAllies = core.CopyTable(core.localUnits["AllyUnits"])
+  local tEnemies = core.CopyTable(core.localUnits["EnemyCreeps"])
+  local distanceLine = Vector3.Distance2DSq(pos1, pos2)
+  local x1, x2, y1, y2 = pos1.x, pos2.x, pos1.y, pos2.y
+  local reserveWidth = 100*100
+
+  local obstructed = false
+
+  for _, creep in pairs(tEnemies) do
+    local posCreep = creep:GetPosition()
+    local x0, y0, z0 = posCreep.x, posCreep.y, posCreep.z
+    local U = (x0 - x1)*(x2 - x1) + (y0 - y1)*(y2 - y1)
+    U = U / ((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1))
+    local xc = x1 + (U * (x2 - x1))
+    local yc = y1 + (U * (y2 - y1))
+    local d2 = (x0 - xc)*(x0 - xc) + (y0 - yc)*(y0 - yc)
+
+    local color = "red"
+    if d2 >= reserveWidth then color = "green" end
+    local t = (xc - x1) / (x2 - x1)
+    local between = t < 1 and t > 0
+    if not between then color = "yellow" end
+
+    if d2 < reserveWidth and between then
+      core.DrawDebugLine(Vector3.Create(x0, y0, z0), Vector3.Create(xc, yc, z0), color)
+      core.DrawXPosition(posCreep, color, 25)
+      obstructed = true
+    else 
+      core.DrawDebugLine(Vector3.Create(x0, y0, z0), Vector3.Create(xc, yc, z0), color)
+      core.DrawXPosition(posCreep, color, 25)
+    end
+  end
+
+  if obstructed then return false end
+
+  core.DrawDebugLine(pos1, pos2, "green")
+  return true
+end
+
 function commonLib.CustomHarassUtility(target)
   local nUtil = 0
   local creepLane = core.GetFurthestCreepWavePos(core.tMyLane, core.bTraverseForward)
