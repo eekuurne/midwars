@@ -15,7 +15,7 @@ object.bAbilityCommands = true
 object.bOtherCommands = true
 
 object.bReportBehavior = false
-object.bDebugUtility = true
+object.bDebugUtility = false
 object.bDebugExecute = false
 
 object.logger = {}
@@ -55,6 +55,11 @@ behaviorLib.criticalHealthPercent = 0.30
 behaviorLib.wellUtilityAtCritical = 22
 behaviorLib.wellManaRegenMinLevel = 6
 behaviorLib.maxWellManaUtility = 2
+
+behaviorLib.StartingItems = {"Item_HealthPotion", "Item_LoggersHatchet", "Item_PretendersCrown"}
+behaviorLib.LaneItems = {"Item_Marchers", "Item_DuckBoots", "Item_Soulscream"}
+behaviorLib.MidItems = {"Item_EnhancedMarchers", "Item_SolsBulwark"}
+behaviorLib.LateItems = {"Item_Protect", "Item_Strength6", "Item_StrengthAgility"}
 
 --------------------------------
 -- Lanes
@@ -99,11 +104,6 @@ function object:SkillBuild()
     skills.attributeBoost:LevelUp()
   end
 end
-
-behaviorLib.StartingItems = {"Item_HealthPotion", "Item_LoggersHatchet", "Item_PretendersCrown"}
-behaviorLib.LaneItems = {"Item_Marchers", "Item_DuckBoots", "Item_Soulscream"}
-behaviorLib.MidItems = {"Item_EnhancedMarchers", "Item_SolsBulwark"}
-behaviorLib.LateItems = {"Item_Protect", "Item_Strength6", "Item_StrengthAgility"}
 
 local function HarassHeroUtilityOverride(botBrain)
   local nUtility = 0
@@ -158,7 +158,9 @@ local function HarassHeroUtilityOverride(botBrain)
     end
   end
 
-  BotEcho("============ "..nUtility.." ============")
+  if object.bDebugUtility == true and nUtility ~= 0 then
+    BotEcho(format("  HarassOverrideUtility: %g", nUtility))
+  end
 
   return nUtility
 end
@@ -177,7 +179,6 @@ local function HarassHeroExecuteOverride(botBrain)
 
   --since we are using an old pointer, ensure we can still see the target for entity targeting
   if core.CanSeeUnit(botBrain, unitTarget) then
-    BotEcho("Action action")
     local dist = Vector3.Distance2D(unitSelf:GetPosition(), unitTarget:GetPosition())
     local attkRange = core.GetAbsoluteAttackRangeToUnit(unitSelf, unitTarget)
 
@@ -188,22 +189,23 @@ local function HarassHeroExecuteOverride(botBrain)
     local facing = core.HeadingDifference(unitSelf, unitTarget:GetPosition())
 
     if not bActionTaken and stun and stun:CanActivate() and Vector3.Distance2D(unitSelf:GetPosition(), unitTarget:GetPosition()) < 300 and facing < 0.3 then
+      BotEcho("STUN")
       bActionTaken = core.OrderAbility(botBrain, stun)
     end
 
     if not bActionTaken and dash and dash:CanActivate() and Vector3.Distance2D(unitSelf:GetPosition(), unitTarget:GetPosition()) < dash:GetRange() and facing < 0.3 then
+      BotEcho("DASH")
       bActionTaken = core.OrderAbility(botBrain, dash)
     end
 
     if not bActionTaken and pole and pole:CanActivate() and Vector3.Distance2D(unitSelf:GetPosition(), unitTarget:GetPosition()) < pole:GetRange() then
+      BotEcho("BASH")
       bActionTaken = core.OrderAbilityEntity(botBrain, pole, unitTarget)
     end
 
   end
 
   if not bActionTaken then
-    BotEcho("Movement action")
-
     local desiredPos = unitTarget:GetPosition()
 
     if not bActionTaken and itemGhostMarchers and itemGhostMarchers:CanActivate() then

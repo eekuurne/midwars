@@ -57,6 +57,8 @@ object.heroName = 'Hero_Devourer'
 --------------------------------
 core.tLanePreferences = {Jungle = 0, Mid = 5, ShortSolo = 0, LongSolo = 0, ShortSupport = 0, LongSupport = 0, ShortCarry = 0, LongCarry = 0}
 
+behaviorLib.criticalHealthPercent = 0.33
+
 --------------------------------
 -- Skills
 --------------------------------
@@ -96,9 +98,9 @@ function object:SkillBuild()
   end
 end
 
-behaviorLib.StartingItems = {"Item_HealthPotion", "2 Item_MinorTotem", "Item_CrushingClaws", "Item_PretendersCrown"}
-behaviorLib.LaneItems = {"Item_Strength5", "2 Item_TrinketOfRestoration", "Item_MysticVestments"}
-behaviorLib.MidItems = {"Item_MagicArmor2", "Item_Marchers", "Item_Striders"}
+behaviorLib.StartingItems = {"Item_CrushingClaws", "Item_PretendersCrown"}
+behaviorLib.LaneItems = {"Item_MysticVestments", "Item_Marchers", "Item_Lifetube", "Item_Strength5"}
+behaviorLib.MidItems = {"Item_Replenish", "Item_MagicArmor2"}
 behaviorLib.LateItems = {"Item_BehemothsHeart"}
 
 ------------------------------------------------------
@@ -109,7 +111,9 @@ behaviorLib.LateItems = {"Item_BehemothsHeart"}
 -- @return: none
 function object:onthinkOverride(tGameVariables)
   self:onthinkOld(tGameVariables)
-
+  if core.unitSelf:GetLevel() > 5 then
+    behaviorLib.nDenyVal = 0
+  end
   -- custom code here
 end
 object.onthinkOld = object.onthink
@@ -132,6 +136,7 @@ object.oncombatevent = object.oncombateventOverride
 
 -- Harass
 local function CustomHarassUtilityOverride(hero)
+
   local nUtility = 0
 
   if skills.hook:CanActivate() then
@@ -246,13 +251,17 @@ end
 
 local hookTarget = nil
 local function HookUtility(botBrain)
-  local hook = skills.hook
+  local hook, ulti = skills.hook, skills.ulti
   if hook and hook:CanActivate() then
     local unitTarget = DetermineHookTarget(hook)
-    if unitTarget then
+    if unitTarget and (unitTarget:GetHealthPercent() < 0.5 or 
+      (ulti:CanActivate() and 
+        (ulti:GetManaCost() + hook:GetManaCost() < core.unitSelf:GetMana()))) then
       hookTarget = unitTarget:GetPosition()
-      core.DrawXPosition(hookTarget, "green", 50)
+      core.DrawXPosition(hookTarget, "green", 100)
       return 60
+    else  
+      return 0
     end
   end
   hookTarget = nil

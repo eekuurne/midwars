@@ -1289,10 +1289,13 @@ function behaviorLib.GetCreepAttackTarget(botBrain, unitEnemyCreep, unitAllyCree
 	return nil
 end
 
+behaviorLib.nDenyVal = 21
+behaviorLib.nLastHitVal = 24
+
 -------- Behavior Functions --------
 function behaviorLib.AttackCreepsUtility(botBrain)	
-	local nDenyVal = 21
-	local nLastHitVal = 24
+	local nDenyVal = behaviorLib.nDenyVal
+	local nLastHitVal = behaviorLib.nLastHitVal
 	local nUtility = 0
 
 	-- Don't deny while pushing
@@ -2397,7 +2400,7 @@ function behaviorLib.PositionSelfUtility(botBrain)
 end
 
 function behaviorLib.PositionSelfExecute(botBrain)
-	local bDebugLines = false
+	local bDebugLines = true
 	local bDebugEchos = false
 	--[[
 	if object.myName == "Bot1" then
@@ -2434,6 +2437,14 @@ function behaviorLib.PositionSelfExecute(botBrain)
 
 	if bDebugEchos then BotEcho("PositionSelf myPos: "..tostring(vecMyPosition)); BotEcho("PositionSelf: "..tostring(vecDesiredPos)) end
 	
+	-- lets still try to be in attack range, huh?
+	if unitTarget and
+		#localUnits["EnemyTowers"] == 0 and
+		core.unitSelf:GetAttackRange() < 200 and 
+		unitTarget:GetHealth() <= core.unitSelf:GetFinalAttackDamageMin(unitTarget)*2 then
+		vecDesiredPos = unitTarget:GetPosition()
+	end
+
 	if vecDesiredPos then
 		behaviorLib.MoveExecute(botBrain, vecDesiredPos)
 	else
@@ -2845,7 +2856,7 @@ end
  
 behaviorLib.wellManaRegenMinLevel = 5
 behaviorLib.maxWellManaUtility = 7
-behaviorLib.criticalHealthPercent = 0.22
+behaviorLib.criticalHealthPercent = 0.33
 behaviorLib.wellUtilityAtCritical = 25
 
 function behaviorLib.WellHealthUtility(nHealthPercent)
