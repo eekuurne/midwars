@@ -28,11 +28,13 @@ object.metadata = {}
 object.behaviorLib = {}
 object.skills = {}
 
-runfile "bots/core.lua"
-runfile "bots/botbraincore.lua"
-runfile "bots/eventsLib.lua"
-runfile "bots/metadata.lua"
-runfile "bots/behaviorLib.lua"
+runfile "bots/teams/mid_xor_feed/core.lua"
+runfile "bots/teams/mid_xor_feed/behaviorLib.lua"
+runfile "bots/teams/mid_xor_feed/botbraincore.lua"
+runfile "bots/teams/mid_xor_feed/eventsLib.lua"
+runfile "bots/teams/mid_xor_feed/metadata.lua"
+
+runfile "bots/teams/mid_xor_feed/commonLib.lua"
 
 local core, eventsLib, behaviorLib, metadata, skills = object.core, object.eventsLib, object.behaviorLib, object.metadata, object.skills
 
@@ -66,6 +68,7 @@ function object:SkillBuild()
     skills.leap = unitSelf:GetAbility(2)
     skills.ulti = unitSelf:GetAbility(3)
     skills.attributeBoost = unitSelf:GetAbility(4)
+    skills.courier = unitSelf:GetAbility(12)
 
     if skills.call and skills.javelin and skills.leap and skills.ulti and skills.attributeBoost then
       bSkillsValid = true
