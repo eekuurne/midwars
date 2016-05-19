@@ -245,24 +245,31 @@ local function CourierUseUtility(botBrain)
     return 0
   end
 
-  i = 1
+  object.courierBuyItem = nil
+
+  local i = 1
   while i <= #componentDefs do
-    if componentDefs[i]:GetCost() <= botBrain:GetGold() then
-      object.courierBuyItem = componentDefs[i]
-      --BotEcho("Queueing component "..componentDefs[i]:GetName().." of "..nextItemDef:GetName())
+    local componentDef = componentDefs[i]
+    if componentDef:GetCost() <= botBrain:GetGold() then
+      object.courierBuyItem = componentDef
+      BotEcho("Queueing component "..componentDef:GetName().." of "..nextItemDef:GetName())
+      BotEcho("Cost: "..componentDef:GetCost().." Gold: "..botBrain:GetGold())
       break
-    else
-      --BotEcho("Not enough gold: "..componentDefs[i]:GetName().." costs "..componentDefs[i]:GetCost())
     end
+
+    if object.courierBuyItem then break end
+    
     i = i + 1
   end
 
   if not object.courierBuyItem then
-    
     return 0
   end
 
-  --BotEcho("Item find successful")
+  if object.bDebugUtility == true then
+    BotEcho(format("  CourierUtility: %g", 100))
+  end
+
   return 100
 end
 

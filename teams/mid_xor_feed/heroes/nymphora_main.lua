@@ -155,20 +155,52 @@ end
 object.oncombateventOld = object.oncombatevent
 object.oncombatevent = object.oncombateventOverride
 
+function behaviorLib.HealUtility(botBrain)
+  local nUtility = 0
+  if not skills.heal then return 0 end
+  if skills.heal:CanActivate() then
+    local unitSelf = core.unitSelf
+    local healthPc = unitSelf:GetHealth() / unitSelf:GetMaxHealth()
+    nUtility = 100 * (1 - healthPc)
+  end
+
+  if object.bDebugUtility == true and nUtility ~= 0 then
+    BotEcho(format("  HealSelfUtility: %g", nUtility))
+  end
+
+  return nUtility
+end
+ 
+function behaviorLib.HealExecute(botBrain)
+  local heal = skills.heal
+  if heal and heal:CanActivate() then
+    return core.OrderAbilityPosition(botBrain, heal, core.unitSelf:GetPosition())
+  end
+  return false
+end
+ 
+behaviorLib.HealBehavior = {}
+behaviorLib.HealBehavior["Utility"] = behaviorLib.HealUtility
+behaviorLib.HealBehavior["Execute"] = behaviorLib.HealExecute
+behaviorLib.HealBehavior["Name"] = "Heal"
+tinsert(behaviorLib.tBehaviors, behaviorLib.HealBehavior) 
+
 local ManaRegenSpellBehavior = {}
 local function ManaRegenSpellUtility(botBrain)
-
+  local nUtility = 0
   local mana = skills.mana
   if not mana or mana:GetLevel() < 2 then return 0 end
   if mana:CanActivate() and core.unitSelf:GetMana() < core.unitSelf:GetMaxMana() * 0.9
   then
-    return 100
+    nUtility = 100
   end
-  return 0
+  if object.bDebugUtility == true and nUtility ~= 0 then
+    BotEcho(format("  ManaRegenSpellUtility: %g", nUtility))
+  end
+  return nUtility
 end
 
 local function ManaRegenSpellExecute(botBrain)
-  BotEcho("3")
   local mana = skills.mana
   if mana and mana:CanActivate() then
     return core.OrderAbilityEntity(botBrain, mana, core.unitSelf)
@@ -192,6 +224,10 @@ local function CustomHarassUtilityOverride(hero)
 
   if skills.heal:CanActivate() then
     nUtility = nUtility + healUtility
+  end
+  
+  if object.bDebugUtility == true and nUtility ~= 0 then
+    BotEcho(format("  CustomHarassUtility: %g", nUtility))
   end
 
   return nUtility
