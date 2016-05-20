@@ -15,7 +15,7 @@ object.bAbilityCommands = true
 object.bOtherCommands = true
 
 object.bReportBehavior = true
-object.bDebugUtility = true
+object.bDebugUtility = false
 object.bDebugExecute = false
 object.bDebugEchos = false
 object.bDebugLines = true
@@ -114,6 +114,7 @@ function object:onthinkOverride(tGameVariables)
   if core.unitSelf:GetLevel() > 5 then
     behaviorLib.nDenyVal = 0
   end
+  --BotEcho("Local enemy towers "..core.NumberElements(core.localUnits["EnemyTowers"]))
   -- custom code here
 end
 object.onthinkOld = object.onthink
@@ -145,6 +146,11 @@ local function CustomHarassUtilityOverride(hero)
 
   if skills.ulti:CanActivate() then
     nUtility = nUtility + 40
+  end
+
+  if core.NumberElements(core.localUnits["EnemyTowers"]) > 0 then 
+    BotEcho("Enemy tower in range, don't harass")
+    return 0 
   end
 
   return nUtility

@@ -7,6 +7,7 @@ local object = _G.object
 object.behaviorLib = object.behaviorLib or {}
 local core, eventsLib, behaviorLib, metadata = object.core, object.eventsLib, object.behaviorLib, object.metadata
 
+
 local print, ipairs, pairs, string, table, next, type, tinsert, tremove, tsort, format, tostring, tonumber, strfind, strsub
 	= _G.print, _G.ipairs, _G.pairs, _G.string, _G.table, _G.next, _G.type, _G.table.insert, _G.table.remove, _G.table.sort, _G.string.format, _G.tostring, _G.tonumber, _G.string.find, _G.string.sub
 local ceil, floor, pi, tan, atan, atan2, abs, cos, sin, acos, asin, max, random
@@ -43,6 +44,78 @@ behaviorLib.nLastPositionTime = 0
 behaviorLib.vecLastDesiredPosition = Vector3.Create()
 behaviorLib.nPositionSelfAllySeparation = 250
 behaviorLib.nAllyInfluenceMul = 1.5
+
+local function IsFreeLine(pos1, pos2)
+  BotEcho("freeline check")
+  core.DrawDebugLine(pos1, pos2, "yellow")
+  local tAllies = core.CopyTable(core.localUnits["AllyUnits"])
+  local tEnemies = core.CopyTable(core.localUnits["EnemyCreeps"])
+  local distanceLine = Vector3.Distance2DSq(pos1, pos2)
+  local x1, x2, y1, y2 = pos1.x, pos2.x, pos1.y, pos2.y
+  local reserveWidth = 100*100
+
+  local obstructed = false
+
+  for _, ally in pairs(tAllies) do
+    local posAlly = ally:GetPosition()
+    local x0, y0, z0 = posAlly.x, posAlly.y, posAlly.z
+    local U = (x0 - x1)*(x2 - x1) + (y0 - y1)*(y2 - y1)
+    U = U / ((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1))
+    local xc = x1 + (U * (x2 - x1))
+    local yc = y1 + (U * (y2 - y1))
+    local d2 = (x0 - xc)*(x0 - xc) + (y0 - yc)*(y0 - yc)
+
+    local color = "red"
+    if d2 >= reserveWidth then color = "green" end
+    local t = (xc - x1) / (x2 - x1)
+    local between = t < 1 and t > 0
+    if not between then color = "yellow" end
+
+    if d2 < reserveWidth and between then
+      core.DrawDebugLine(Vector3.Create(x0, y0, z0), Vector3.Create(xc, yc, z0), color)
+      core.DrawXPosition(posAlly, color, 25)
+      obstructed = true
+      break
+    else
+      --core.DrawXPosition(posCreep, color, 25)
+      --core.DrawDebugLine(Vector3.Create(x0, y0, z0), Vector3.Create(xc, yc, z0), color)
+    end
+  end
+
+  if not obstructed then
+  	for _, creep in pairs(tEnemies) do
+	    local posCreep = creep:GetPosition()
+	    local x0, y0, z0 = posCreep.x, posCreep.y, posCreep.z
+	    local U = (x0 - x1)*(x2 - x1) + (y0 - y1)*(y2 - y1)
+	    U = U / ((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1))
+	    local xc = x1 + (U * (x2 - x1))
+	    local yc = y1 + (U * (y2 - y1))
+	    local d2 = (x0 - xc)*(x0 - xc) + (y0 - yc)*(y0 - yc)
+
+	    local color = "red"
+	    if d2 >= reserveWidth then color = "green" end
+	    local t = (xc - x1) / (x2 - x1)
+	    local between = t < 1 and t > 0
+	    if not between then color = "yellow" end
+
+	    if d2 < reserveWidth and between then
+	      core.DrawDebugLine(Vector3.Create(x0, y0, z0), Vector3.Create(xc, yc, z0), color)
+	      core.DrawXPosition(posCreep, color, 25)
+	      obstructed = true
+	      break
+	    else 
+	      --core.DrawDebugLine(Vector3.Create(x0, y0, z0), Vector3.Create(xc, yc, z0), color)
+	      --core.DrawXPosition(posCreep, color, 25)
+	    end
+  	end
+  end
+
+  if obstructed then return false end
+
+  core.DrawDebugLine(pos1, pos2, "green")
+  return true
+end
+
 function behaviorLib.PositionSelfCreepWave(botBrain, unitCurrentTarget)
 	local bDebugLines = false
 	local bDebugEchos = false
@@ -2438,11 +2511,18 @@ function behaviorLib.PositionSelfExecute(botBrain)
 	if bDebugEchos then BotEcho("PositionSelf myPos: "..tostring(vecMyPosition)); BotEcho("PositionSelf: "..tostring(vecDesiredPos)) end
 	
 	-- lets still try to be in attack range, huh?
+	local enemyTowers = core.localUnits["EnemyTowers"]
+	local numEnemyTowers = core.NumberElements(enemyTowers)
+
 	if unitTarget and
-		#localUnits["EnemyTowers"] == 0 and
+		numEnemyTowers == 0 and
 		core.unitSelf:GetAttackRange() < 200 and 
 		unitTarget:GetHealth() <= core.unitSelf:GetFinalAttackDamageMin(unitTarget)*2 then
 		vecDesiredPos = unitTarget:GetPosition()
+	else 
+		if numEnemyTowers > 0 then
+			--BotEcho("Enemy tower in range: disable position override")
+		end
 	end
 
 	if vecDesiredPos then
@@ -2675,6 +2755,20 @@ function behaviorLib.funcGetThreatOfEnemy(unitEnemy)
 	-- This is something that perhaps should be looked into simplifying.
 
 	nThreat = Clamp(3 * (112810000 - nDistanceSq) / (4 * (19 * nDistanceSq + 32810000)), 0.75, 2) * nThreat
+
+	BotEcho(unitEnemy:GetTypeName().." threat "..nThreat)
+	local unitSelf = core.unitSelf
+
+	if unitEnemy:GetTypeName() == "Hero_Devourer" and unitEnemy:GetPosition() and
+		IsFreeLine(unitSelf:GetPosition(), unitEnemy:GetPosition()) then
+		BotEcho("ExtraThreat")
+		if (unitEnemy:GetHealth() > unitSelf:GetHealth()) or 
+			core.NumberElements(core.localUnits["EnemyTowers"]) > 0 then
+			BotEcho("================ SuperThreat ================")
+			nThreat = nThreat + 100
+		end
+	end
+
 	return nThreat
 end
 
