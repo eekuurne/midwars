@@ -51,8 +51,8 @@ BotEcho('loading monkeyking_main...')
 
 object.heroName = 'Hero_MonkeyKing'
 
-behaviorLib.criticalHealthPercent = 0.30
-behaviorLib.wellUtilityAtCritical = 22
+behaviorLib.criticalHealthPercent = 0.4
+behaviorLib.wellUtilityAtCritical = 25
 behaviorLib.wellManaRegenMinLevel = 6
 behaviorLib.maxWellManaUtility = 2
 
