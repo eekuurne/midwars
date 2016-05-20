@@ -2756,7 +2756,7 @@ function behaviorLib.funcGetThreatOfEnemy(unitEnemy)
 
 	nThreat = Clamp(3 * (112810000 - nDistanceSq) / (4 * (19 * nDistanceSq + 32810000)), 0.75, 2) * nThreat
 
-	BotEcho(unitEnemy:GetTypeName().." threat "..nThreat)
+	--BotEcho(unitEnemy:GetTypeName().." threat "..nThreat)
 	local unitSelf = core.unitSelf
 
 	if unitEnemy:GetTypeName() == "Hero_Devourer" and unitEnemy:GetPosition() and
