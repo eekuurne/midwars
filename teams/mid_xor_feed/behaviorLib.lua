@@ -2516,16 +2516,17 @@ function behaviorLib.PositionSelfExecute(botBrain)
 	local enemyTowers = core.localUnits["EnemyTowers"]
 	local numEnemyTowers = core.NumberElements(enemyTowers)
 
-	if unitTarget and
-		numEnemyTowers == 0 and
-		core.unitSelf:GetAttackRange() < 200 and 
-		unitTarget:GetHealth() <= core.unitSelf:GetFinalAttackDamageMin(unitTarget)*2 then
-		vecDesiredPos = unitTarget:GetPosition()
-	else 
-		if numEnemyTowers > 0 then
-			--BotEcho("Enemy tower in range: disable position override")
-		end
-	end
+	--[[
+			if unitTarget and
+				numEnemyTowers == 0 and
+				core.unitSelf:GetAttackRange() < 200 and 
+				unitTarget:GetHealth() <= core.unitSelf:GetFinalAttackDamageMin(unitTarget)*2 then
+				vecDesiredPos = unitTarget:GetPosition()
+			else 
+				if numEnemyTowers > 0 then
+					--BotEcho("Enemy tower in range: disable position override")
+				end
+			end]]
 
 	if vecDesiredPos then
 		behaviorLib.MoveExecute(botBrain, vecDesiredPos)
