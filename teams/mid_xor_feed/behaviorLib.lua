@@ -20,6 +20,8 @@ local nSqrtTwo = math.sqrt(2)
 behaviorLib.tBehaviors = {}
 behaviorLib.nNextBehaviorTime = HoN.GetGameTime()
 behaviorLib.nBehaviorAssessInterval = 250
+behaviorLib.printShopDebug = true
+behaviorLib.lastShopCheck = 0
 
 local BotEcho, VerboseLog, Clamp = core.BotEcho, core.VerboseLog, core.Clamp
 
@@ -112,7 +114,7 @@ local function IsFreeLine(pos1, pos2)
 
   if obstructed then return false end
 
-  core.DrawDebugLine(pos1, pos2, "green")
+  --core.DrawDebugLine(pos1, pos2, "green")
   return true
 end
 
@@ -3641,6 +3643,8 @@ end
 -------- Behavior Fns --------
 function behaviorLib.ShopUtility(botBrain)
 	--BotEcho('CanAccessStash: '..tostring(core.unitSelf:CanAccessStash()))
+
+ 
 	local bCanAccessShop = core.unitSelf:CanAccessStash()
 
 	--just got into shop access, try buying
@@ -3649,10 +3653,18 @@ function behaviorLib.ShopUtility(botBrain)
 		behaviorLib.finishedBuying = false
 	end
 
+	if 
+		(HoN.GetGameTime() - behaviorLib.lastShopCheck) > 10000 then
+		BotEcho(""..HoN.GetGameTime() - behaviorLib.lastShopCheck)
+		behaviorLib.lastShopCheck = HoN.GetGameTime()
+		return 99
+	end
+
 	behaviorLib.canAccessShopLast = bCanAccessShop
 
 	local utility = 0
-	if bCanAccessShop and not behaviorLib.finishedBuying then
+		if bCanAccessShop
+		and not behaviorLib.finishedBuying then
 		if not core.teamBotBrain.bPurchasedThisFrame then
 			utility = 99
 		end
@@ -3677,6 +3689,8 @@ Current algorithm:
        3. Homecoming Stone
        4. Most Expensive Item(s) (price decending)
 --]]
+	--BotEcho("ShopCheck")
+
 	if object.bUseShop == false then
 		return
 	end
@@ -3700,23 +3714,11 @@ Current algorithm:
 	local nextItemDef = behaviorLib.DetermineNextItemDef(botBrain)
 	local bMyTeamHasHuman = core.MyTeamHasHuman()
 	local bBuyTPStone = (core.nDifficulty ~= core.nEASY_DIFFICULTY) or bMyTeamHasHuman
-  
-  --[[
-	--For our first frame of this execute
-	if bBuyTPStone and core.GetLastBehaviorName(botBrain) ~= core.GetCurrentBehaviorName(botBrain) then
-		if nextItemDef:GetName() ~= core.idefHomecomingStone:GetName() then		
-			--Seed a TP stone into the buy items after 1 min, Don't buy TP stones if we have Post Haste
-			local sName = "Item_HomecomingStone"
-			local nTime = HoN.GetMatchTime()
-			local tItemPostHaste = core.InventoryContains(tInventory, "Item_PostHaste", true)
-			if nTime > core.MinToMS(1) and #tItemPostHaste then
-				tinsert(behaviorLib.curItemList, 1, sName)
-			end
-			
-			nextItemDef = behaviorLib.DetermineNextItemDef(botBrain)
-		end
-	end
-	]]--
+  local atShop = core.unitSelf:CanAccessStash()
+
+  --if not atShop and object.needsStashAccess then
+  --	return 
+  --end
 	
 	if behaviorLib.printShopDebug then
 		BotEcho("============ BuyItems ============")
@@ -3742,7 +3744,11 @@ Current algorithm:
 		end
 
 		if #componentDefs > slotsOpen + 1 then --1 for provisional slot
-			behaviorLib.SellLowestItems(botBrain, #componentDefs - slotsOpen - 1)
+			if atShop then
+				behaviorLib.SellLowestItems(botBrain, #componentDefs - slotsOpen - 1)
+			else
+				object.needsStashAccess = true
+			end
 		elseif #componentDefs == 0 then
 			behaviorLib.ShuffleCombine(botBrain, nextItemDef, unitSelf)
 		end
@@ -3764,14 +3770,27 @@ Current algorithm:
 		behaviorLib.addItemBehavior(nextItemDef:GetName())
 	end
 
-	bShuffled = behaviorLib.SortInventoryAndStash(botBrain)
+	if atShop then
+		bShuffled = behaviorLib.SortInventoryAndStash(botBrain)
+	end
 	
 	if not bGoldReduced and not bShuffled then
 		if behaviorLib.printShopDebug then
 			BotEcho("Finished Buying!")
 		end
-		
 		behaviorLib.finishedBuying = true
+	end
+
+	if not atShop and bGoldReduced then 
+		courier = object.skills.courier
+	  BotEcho("----------------------------- Buying something ---------------------")
+	  if not courier:CanActivate() then
+	    if courierDebug then
+	      BotEcho("Cannot use courier")
+	    end
+	    return 0
+	  end
+	  core.OrderAbility(botBrain, courier)
 	end
 end
 

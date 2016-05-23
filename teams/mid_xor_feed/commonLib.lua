@@ -312,7 +312,7 @@ local function CourierUseExecute(botBrain)
   return core.OrderAbility(botBrain, courier)
 end
 
-CourierUseBehavior["Utility"] = CourierUseUtility
-CourierUseBehavior["Execute"] = CourierUseExecute
-CourierUseBehavior["Name"] = "Use courier"
-tinsert(behaviorLib.tBehaviors, CourierUseBehavior)
+--CourierUseBehavior["Utility"] = CourierUseUtility
+--CourierUseBehavior["Execute"] = CourierUseExecute
+--CourierUseBehavior["Name"] = "Use courier"
+--tinsert(behaviorLib.tBehaviors, CourierUseBehavior)
