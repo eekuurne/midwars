@@ -146,7 +146,7 @@ local function HarassHeroUtilityOverride(botBrain)
 
   -- a puppet is placed
   if behaviorLib.heroTargetOverride then
-    BotEcho("Exists puppet! extra utility for harass!")
+    --BotEcho("Exists puppet! extra utility for harass!")
     nUtility = nUtility + 40
   end
 
@@ -157,7 +157,7 @@ local function HarassHeroUtilityOverride(botBrain)
   if unitTarget then
 
     if commonLib.IsDisabled(unitTarget) then
-      BotEcho("Enemy disabled! extra utility for harass!")
+      --BotEcho("Enemy disabled! extra utility for harass!")
       nUtility = nUtility + 30
     end
 

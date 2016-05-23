@@ -47,8 +47,8 @@ function commonLib.IsDisabled(enemyTarget)
 end
 
 function commonLib.IsFreeLine(pos1, pos2)
-  BotEcho("freeline check")
-  core.DrawDebugLine(pos1, pos2, "yellow")
+  --BotEcho("freeline check")
+  --core.DrawDebugLine(pos1, pos2, "yellow")
   local tAllies = core.CopyTable(core.localUnits["AllyUnits"])
   local tEnemies = core.CopyTable(core.localUnits["EnemyCreeps"])
   local distanceLine = Vector3.Distance2DSq(pos1, pos2)
@@ -73,8 +73,8 @@ function commonLib.IsFreeLine(pos1, pos2)
     if not between then color = "yellow" end
 
     if d2 < reserveWidth and between then
-      core.DrawDebugLine(Vector3.Create(x0, y0, z0), Vector3.Create(xc, yc, z0), color)
-      core.DrawXPosition(posAlly, color, 25)
+      --core.DrawDebugLine(Vector3.Create(x0, y0, z0), Vector3.Create(xc, yc, z0), color)
+      --core.DrawXPosition(posAlly, color, 25)
       obstructed = true
       break
     else
@@ -100,8 +100,8 @@ function commonLib.IsFreeLine(pos1, pos2)
       if not between then color = "yellow" end
 
       if d2 < reserveWidth and between then
-        core.DrawDebugLine(Vector3.Create(x0, y0, z0), Vector3.Create(xc, yc, z0), color)
-        core.DrawXPosition(posCreep, color, 25)
+        --core.DrawDebugLine(Vector3.Create(x0, y0, z0), Vector3.Create(xc, yc, z0), color)
+        --core.DrawXPosition(posCreep, color, 25)
         obstructed = true
         break
       else 
@@ -118,7 +118,7 @@ function commonLib.IsFreeLine(pos1, pos2)
 end
 
 function commonLib.IsFreeLineNoAllies(pos1, pos2)
-  BotEcho("freeline check")
+  --BotEcho("freeline check")
   core.DrawDebugLine(pos1, pos2, "yellow")
   local tAllies = core.CopyTable(core.localUnits["AllyUnits"])
   local tEnemies = core.CopyTable(core.localUnits["EnemyCreeps"])
@@ -144,18 +144,16 @@ function commonLib.IsFreeLineNoAllies(pos1, pos2)
     if not between then color = "yellow" end
 
     if d2 < reserveWidth and between then
-      core.DrawDebugLine(Vector3.Create(x0, y0, z0), Vector3.Create(xc, yc, z0), color)
-      core.DrawXPosition(posCreep, color, 25)
+      --core.DrawDebugLine(Vector3.Create(x0, y0, z0), Vector3.Create(xc, yc, z0), color)
+      --core.DrawXPosition(posCreep, color, 25)
       obstructed = true
-    else 
-      core.DrawDebugLine(Vector3.Create(x0, y0, z0), Vector3.Create(xc, yc, z0), color)
-      core.DrawXPosition(posCreep, color, 25)
+      break
     end
   end
 
   if obstructed then return false end
 
-  core.DrawDebugLine(pos1, pos2, "green")
+  --core.DrawDebugLine(pos1, pos2, "green")
   return true
 end
 

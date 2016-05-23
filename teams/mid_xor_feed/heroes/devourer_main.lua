@@ -148,11 +148,12 @@ local function CustomHarassUtilityOverride(hero)
     nUtility = nUtility + 40
   end
 
+--[[
   if core.NumberElements(core.localUnits["EnemyTowers"]) > 0 then 
     BotEcho("Enemy tower in range, don't harass")
     return 0 
   end
-
+]]
   return nUtility
 end
 behaviorLib.CustomHarassUtility = CustomHarassUtilityOverride

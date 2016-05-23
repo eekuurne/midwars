@@ -213,7 +213,6 @@ ManaRegenSpellBehavior["Name"] = "Mana regen spell"
 tinsert(behaviorLib.tBehaviors, ManaRegenSpellBehavior)
 
 local function CustomHarassUtilityOverride(hero)
-  BotEcho("2")
   local nUtility = 0
   local stunUtility = 20
   local healUtility = 20
@@ -236,7 +235,6 @@ behaviorLib.CustomHarassUtility = CustomHarassUtilityOverride
 
 
 local function HarassHeroExecuteOverride(botBrain)
-  BotEcho("1")
   local unitTarget = behaviorLib.heroTarget
 
   if unitTarget == nil or not unitTarget:IsValid() then
@@ -264,20 +262,20 @@ local function HarassHeroExecuteOverride(botBrain)
     if not bActionTaken and stun and stun:CanActivate() and 
       Vector3.Distance2D(unitSelf:GetPosition(), unitTarget:GetPosition()) < stun:GetRange()*0.9 then
 
-      BotEcho("!!!!!!!!!!!!!!1 Using stun")
+      --BotEcho("!!!!!!!!!!!!!!1 Using stun")
       local ownPos = core.unitSelf:GetPosition()
       local enemyPos = unitTarget:GetPosition()
       local direction = Vector3.Normalize(enemyPos - ownPos)
       local targetSpot = ownPos + direction * stun:GetRange()
 
-      core.DrawXPosition(targetSpot, "yellow", 100)
+      --core.DrawXPosition(targetSpot, "yellow", 100)
       bActionTaken = core.OrderAbilityPosition(botBrain, stun, targetSpot)
     end
 
     if not bActionTaken and heal and heal:CanActivate() and 
       Vector3.Distance2D(unitSelf:GetPosition(), unitTarget:GetPosition()) < (heal:GetRange() + 100) then
 
-      BotEcho("!!!!!!!!!!!!!!1 Using heal")
+      --BotEcho("!!!!!!!!!!!!!!1 Using heal")
       local ownPos = core.unitSelf:GetPosition()
       local enemyPos = unitTarget:GetPosition()
       local direction = Vector3.Normalize(enemyPos - ownPos)
@@ -287,7 +285,7 @@ local function HarassHeroExecuteOverride(botBrain)
         targetSpot = ownPos + direction * (heal:GetRange())
       end
 
-      core.DrawXPosition(targetSpot, "green", 100)
+      --core.DrawXPosition(targetSpot, "green", 100)
       bActionTaken = core.OrderAbilityPosition(botBrain, heal, targetSpot)
     end
   end
