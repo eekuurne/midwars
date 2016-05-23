@@ -316,3 +316,37 @@ end
 --CourierUseBehavior["Execute"] = CourierUseExecute
 --CourierUseBehavior["Name"] = "Use courier"
 --tinsert(behaviorLib.tBehaviors, CourierUseBehavior)
+
+local DenyTowerBehavior = {}
+local function DenyTowerUtility(botBrain)
+  local allyTowers = core.localUnits["AllyTowers"]
+  for i, tower in pairs(allyTowers) do
+    local healthPercent = tower:GetHealthPercent()
+    if healthPercent < 0.1 then
+      object.towerToDeny = tower
+      return 25
+    end
+  end
+  object.towerToDeny = nil
+  return 0
+end
+
+local function DenyTowerExecute(botBrain)
+  if object.towerToDeny then
+    local range = core.unitSelf:GetAttackRange()
+    local ownPos = core.unitSelf:GetPosition()
+    local towerPos = object.towerToDeny:GetPosition()
+    if Vector3.Distance2DSq(ownPos, towerPos) > range*range then
+      core.DrawXPosition(towerPos, "yellow", 100)
+      return core.OrderMoveToPosClamp(botBrain, core.unitSelf, towerPos)
+    else
+      core.DrawXPosition(towerPos, "red", 100)
+      return core.OrderAttackClamp(botBrain, core.unitSelf, object.towerToDeny)
+    end
+  end
+end
+
+DenyTowerBehavior["Utility"] = DenyTowerUtility
+DenyTowerBehavior["Execute"] = DenyTowerExecute
+DenyTowerBehavior["Name"] = "Deny tower"
+tinsert(behaviorLib.tBehaviors, DenyTowerBehavior)
