@@ -1684,7 +1684,7 @@ function behaviorLib.ProcessDeath(unit)
 end
 
 ----------------------------------
-behaviorLib.diveThreshold = 90
+behaviorLib.diveThreshold = 85
 behaviorLib.lastHarassUtil = 0
 behaviorLib.heroTarget = nil
 
@@ -2993,7 +2993,7 @@ end
 behaviorLib.wellManaRegenMinLevel = 5
 behaviorLib.maxWellManaUtility = 7
 behaviorLib.criticalHealthPercent = 0.33
-behaviorLib.wellUtilityAtCritical = 42
+behaviorLib.wellUtilityAtCritical = 45
 
 function behaviorLib.WellHealthUtility(nHealthPercent)
 	local nHeight = 100
