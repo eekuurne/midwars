@@ -51,11 +51,6 @@ BotEcho('loading monkeyking_main...')
 
 object.heroName = 'Hero_MonkeyKing'
 
-behaviorLib.criticalHealthPercent = 0.4
-behaviorLib.wellUtilityAtCritical = 25
-behaviorLib.wellManaRegenMinLevel = 6
-behaviorLib.maxWellManaUtility = 2
-
 behaviorLib.StartingItems = {"Item_DuckBoots", "Item_IronBuckler", "Item_GuardianRing"}
 behaviorLib.LaneItems = {"Item_DuckBoots", "Item_Marchers", "Item_SolsBulwark"}
 behaviorLib.MidItems = {"Item_EnhancedMarchers", "Item_Platemail", "Item_Warpcleft"}

@@ -118,34 +118,14 @@ function object:onthinkOverride(tGameVariables)
 
   local unitSelf = self.core.unitSelf
   local teamBotBrain = core.teamBotBrain
-
-  if unitSelf:GetLevel() > 3 then
-    behaviorLib.criticalHealthPercent = 0.25
-    behaviorLib.wellUtilityAtCritical = 32
-  elseif unitSelf:GetLevel() > 5 then
-    behaviorLib.maxWellManaUtility = 14
-    behaviorLib.criticalHealthPercent = 0.30
-    behaviorLib.wellUtilityAtCritical = 56
-  elseif unitSelf:GetLevel() > 7 then
-    behaviorLib.maxWellManaUtility = 28
-    behaviorLib.criticalHealthPercent = 0.41
-    behaviorLib.wellUtilityAtCritical = 66
-  end
-
   local tEnemyHeroes = core.CopyTable(core.localUnits["EnemyHeroes"])
 
   local lowestHealthPercent = 1
   for _, enemyHero in pairs(tEnemyHeroes) do
     if enemyHero:GetHealthPercent() < lowestHealthPercent then
       lowestHealthPercent = enemyHero:GetHealthPercent()
-
-      if nukeTarget == nil then
-        BotEcho("Assigned new nuke target!")
-      end
-
       nukeTarget = enemyHero
     end
-
   end
 
   if nukeTarget and nukeTarget:GetHealthPercent() > 0.6 then
@@ -346,7 +326,7 @@ local function CallPushUtility(botBrain)
   
   local call = skills.call
   if call and call:CanActivate() then
-      for _, ally in pairs(tAllies) do
+    for _, ally in pairs(tAllies) do
       local typeAlly = ally:GetTypeName()
 
       if typeAlly == "Creep_LegionSiege" or typeAlly == "Creep_HellbourneSiege" then

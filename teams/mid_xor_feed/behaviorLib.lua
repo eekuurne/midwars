@@ -1684,7 +1684,7 @@ function behaviorLib.ProcessDeath(unit)
 end
 
 ----------------------------------
-behaviorLib.diveThreshold = 75
+behaviorLib.diveThreshold = 90
 behaviorLib.lastHarassUtil = 0
 behaviorLib.heroTarget = nil
 
@@ -2810,21 +2810,26 @@ function behaviorLib.RetreatFromThreatUtility(botBrain)
 	local nTowerProjectilesUtility = numTowerProj * behaviorLib.nTowerProjectileUtility
 	
 	local nTowerUtility = max(nTowerProjectilesUtility, nTowerAggroUtility)
-	
+
+	-- Escape if there are too many enemies and too few allies
 	local underDogUtility = 0
 	local allies = core.localUnits["AllyHeroes"]
 	local enemies = core.localUnits["EnemyHeroes"]
 
+	local nearbyAllyIsLowLevel = false
 	local nearbyAllies = 0
 	for _, ally in pairs(allies) do
 		if Vector3.Distance2D(ally:GetPosition(), unitSelf:GetPosition()) < 1000 then
       		nearbyAllies = nearbyAllies + 1
+      		if ally:GetLevel() < 10 then
+      			nearbyAllyIsLowLevel = true
+      		end
 		end
     end
 
     local nearbyEnemies = 0
 	for _, enemy in pairs(enemies) do
-		if Vector3.Distance2D(enemy:GetPosition(), unitSelf:GetPosition()) < 1000 then
+		if Vector3.Distance2D(enemy:GetPosition(), unitSelf:GetPosition()) < 1200 then
       		nearbyEnemies = nearbyEnemies + 1
 		end
     end
@@ -2833,8 +2838,20 @@ function behaviorLib.RetreatFromThreatUtility(botBrain)
     	underDogUtility = underDogUtility + (nearbyEnemies - nearbyAllies) * 5
     end
 
+    -- Escape if too close to tower in early game
+    local earlyTowerUtility = 0
+    if unitSelf:GetLevel() < 10 or nearbyAllyIsLowLevel then
+    	for _, enemyTower in pairs(tEnemyTowers) do
+			if Vector3.Distance2D(enemyTower:GetPosition(), unitSelf:GetPosition()) < (1100 - unitSelf:GetLevel() * 50) then
+	      		earlyTowerUtility = earlyTowerUtility + 40 - unitSelf:GetLevel() * 4
+	      		BotEcho("APUA TORNI!!!!")
+			end
+	    end
+    end
+
+
 	--Total
-	local nUtility = nCreepAggroUtility + nRecentDamageUtility + nTowerUtility + underDogUtility
+	local nUtility = nCreepAggroUtility + nRecentDamageUtility + nTowerUtility * 2 + underDogUtility + earlyTowerUtility
 
 	if bDebugEchos then
 		BotEcho(format("nRecentDmgUtil: %d  nRecentDamage: %g", nRecentDamageUtility, nRecentDamage))
@@ -2976,7 +2993,7 @@ end
 behaviorLib.wellManaRegenMinLevel = 5
 behaviorLib.maxWellManaUtility = 7
 behaviorLib.criticalHealthPercent = 0.33
-behaviorLib.wellUtilityAtCritical = 25
+behaviorLib.wellUtilityAtCritical = 42
 
 function behaviorLib.WellHealthUtility(nHealthPercent)
 	local nHeight = 100

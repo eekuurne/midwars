@@ -51,11 +51,6 @@ BotEcho('loading puppetmaster_main...')
 
 object.heroName = 'Hero_PuppetMaster'
 
-behaviorLib.criticalHealthPercent = 0.33
-behaviorLib.wellUtilityAtCritical = 30
-behaviorLib.wellManaRegenMinLevel = 6
-behaviorLib.maxWellManaUtility = 2
-
 behaviorLib.StartingItems = {"Item_PretendersCrown", "2 Item_MinorTotem", "Item_MarkOfTheNovice"}
 behaviorLib.LaneItems = {"Item_Marchers", "Item_Intelligence5"}
 behaviorLib.MidItems = {"Item_Steamboots", "Item_WhisperingHelm"}
