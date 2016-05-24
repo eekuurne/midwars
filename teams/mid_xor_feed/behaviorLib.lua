@@ -2561,12 +2561,12 @@ tinsert(behaviorLib.tBehaviors, behaviorLib.PositionSelfBehavior)
 --TODO: work in a "stand away from threatening heroes" behavior?
 
 behaviorLib.nCreepAggroUtilityEasy = 2
-behaviorLib.nCreepAggroUtility = 25
+behaviorLib.nCreepAggroUtility = 28
 behaviorLib.nRecentDamageMul = 0.35
-behaviorLib.nTowerProjectileUtility = 33
-behaviorLib.nTowerAggroUtility = 25
+behaviorLib.nTowerProjectileUtility = 43
+behaviorLib.nTowerAggroUtility = 35
 
-behaviorLib.retreatGhostMarchersThreshold = 30
+behaviorLib.retreatGhostMarchersThreshold = 40
 
 behaviorLib.lastRetreatUtil = 0
 
@@ -2811,9 +2811,31 @@ function behaviorLib.RetreatFromThreatUtility(botBrain)
 	
 	local nTowerUtility = max(nTowerProjectilesUtility, nTowerAggroUtility)
 	
+	local underDogUtility = 0
+	local allies = core.localUnits["AllyHeroes"]
+	local enemies = core.localUnits["EnemyHeroes"]
+
+	local nearbyAllies = 0
+	for _, ally in pairs(allies) do
+		if Vector3.Distance2D(ally:GetPosition(), unitSelf:GetPosition()) < 1000 then
+      		nearbyAllies = nearbyAllies + 1
+		end
+    end
+
+    local nearbyEnemies = 0
+	for _, enemy in pairs(enemies) do
+		if Vector3.Distance2D(enemy:GetPosition(), unitSelf:GetPosition()) < 1000 then
+      		nearbyEnemies = nearbyEnemies + 1
+		end
+    end
+
+    if nearbyEnemies > nearbyAllies then
+    	underDogUtility = underDogUtility + (nearbyEnemies - nearbyAllies) * 5
+    end
+
 	--Total
-	local nUtility = nCreepAggroUtility + nRecentDamageUtility + nTowerUtility
-	
+	local nUtility = nCreepAggroUtility + nRecentDamageUtility + nTowerUtility + underDogUtility
+
 	if bDebugEchos then
 		BotEcho(format("nRecentDmgUtil: %d  nRecentDamage: %g", nRecentDamageUtility, nRecentDamage))
 		BotEcho(format("nTowerUtil: %d  max( nTowerProjectilesUtil: %d, nTowerAggroUtil: %d )", 
@@ -2837,7 +2859,7 @@ function behaviorLib.RetreatFromThreatUtility(botBrain)
 	end
 	
 	--bonus of allies decrease fear
-	local allies = core.localUnits["AllyHeroes"]
+	
 	local nAllies = core.NumberElements(allies) + 1
 	
 	--get enemy heroes

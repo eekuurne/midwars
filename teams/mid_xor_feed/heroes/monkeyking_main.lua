@@ -56,10 +56,10 @@ behaviorLib.wellUtilityAtCritical = 25
 behaviorLib.wellManaRegenMinLevel = 6
 behaviorLib.maxWellManaUtility = 2
 
-behaviorLib.StartingItems = {"Item_HealthPotion", "Item_LoggersHatchet", "Item_PretendersCrown"}
-behaviorLib.LaneItems = {"Item_Marchers", "Item_DuckBoots", "Item_Soulscream"}
-behaviorLib.MidItems = {"Item_EnhancedMarchers", "Item_SolsBulwark"}
-behaviorLib.LateItems = {"Item_Protect", "Item_Strength6", "Item_StrengthAgility"}
+behaviorLib.StartingItems = {"Item_DuckBoots", "Item_IronBuckler", "Item_GuardianRing"}
+behaviorLib.LaneItems = {"Item_DuckBoots", "Item_Marchers", "Item_SolsBulwark"}
+behaviorLib.MidItems = {"Item_EnhancedMarchers", "Item_Platemail", "Item_Warpcleft"}
+behaviorLib.LateItems = {"Item_DaemonicBreastplate", "Item_Strength6", "Item_StrengthAgility"}
 
 --------------------------------
 -- Lanes

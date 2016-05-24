@@ -51,9 +51,9 @@ BotEcho('loading valkyrie_main...')
 object.heroName = 'Hero_Valkyrie'
 
 
-behaviorLib.StartingItems = {"2 Item_MinorTotem", "Item_PretendersCrown", "Item_MarkOfTheNovice", "Item_Intelligence5"}
-behaviorLib.LaneItems = {"Item_Replenish", "Item_PretendersCrown", "Item_TrinketOfRestoration", "Item_MysticPotpourri", "Item_CrushingClaws", "Item_Strength5", "Item_Astrolabe"}
-behaviorLib.MidItems = {"Item_Marchers", "Item_EnhancedMarchers", "Item_Sicarius", "Item_ManaBurn1", "Item_ManaBurn2"}
+behaviorLib.StartingItems = {"Item_MysticPotpourri"}
+behaviorLib.LaneItems = {"Item_PretendersCrown", "Item_MarkOfTheNovice", "Item_Intelligence5", "Item_Replenish", "Item_PretendersCrown", "Item_CrushingClaws", "Item_Strength5", "Item_Astrolabe"}
+behaviorLib.MidItems = {"Item_Marchers", "Item_EnhancedMarchers", "Item_Pierce"}
 behaviorLib.LateItems = {"Item_Immunity", "Item_BehemothsHeart"}
 
 
@@ -88,24 +88,24 @@ function object:SkillBuild()
     return
   end
 
-  if skills.javelin:CanLevelUp() and unitSelf:GetLevel() == 6 then
+  if skills.javelin:CanLevelUp() and unitSelf:GetLevel() == 1 then
     skills.javelin:LevelUp()
-  elseif skills.leap:CanLevelUp() and unitSelf:GetLevel() == 1 then
+  elseif skills.leap:CanLevelUp() and unitSelf:GetLevel() == 2 then
     skills.leap:LevelUp()
-    elseif skills.attributeBoost:CanLevelUp() and unitSelf:GetLevel() == 4 then
-    skills.attributeBoost:LevelUp()
+  elseif skills.ulti:CanLevelUp() then
+    skills.ulti:LevelUp()
   elseif skills.call:CanLevelUp() then
     skills.call:LevelUp()
   elseif skills.javelin:CanLevelUp() then
     skills.javelin:LevelUp()
   elseif skills.leap:CanLevelUp() then
     skills.leap:LevelUp()
-  elseif skills.attributeBoost:CanLevelUp() then
-    skills.attributeBoost:LevelUp()
   else
-    skills.ulti:LevelUp()
+    skills.attributeBoost:LevelUp()
   end
 end
+
+local nukeTarget = nil
 
 ------------------------------------------------------
 --            onthink override                      --
@@ -117,9 +117,10 @@ function object:onthinkOverride(tGameVariables)
   self:onthinkOld(tGameVariables)
 
   local unitSelf = self.core.unitSelf
+  local teamBotBrain = core.teamBotBrain
 
   if unitSelf:GetLevel() > 3 then
-    behaviorLib.criticalHealthPercent = 0.24
+    behaviorLib.criticalHealthPercent = 0.25
     behaviorLib.wellUtilityAtCritical = 32
   elseif unitSelf:GetLevel() > 5 then
     behaviorLib.maxWellManaUtility = 14
@@ -129,6 +130,26 @@ function object:onthinkOverride(tGameVariables)
     behaviorLib.maxWellManaUtility = 28
     behaviorLib.criticalHealthPercent = 0.41
     behaviorLib.wellUtilityAtCritical = 66
+  end
+
+  local tEnemyHeroes = core.CopyTable(core.localUnits["EnemyHeroes"])
+
+  local lowestHealthPercent = 1
+  for _, enemyHero in pairs(tEnemyHeroes) do
+    if enemyHero:GetHealthPercent() < lowestHealthPercent then
+      lowestHealthPercent = enemyHero:GetHealthPercent()
+
+      if nukeTarget == nil then
+        BotEcho("Assigned new nuke target!")
+      end
+
+      nukeTarget = enemyHero
+    end
+
+  end
+
+  if nukeTarget and nukeTarget:GetHealthPercent() > 0.6 then
+    nukeTarget = nil
   end
 
   -- custom code here
@@ -357,12 +378,12 @@ local function CallPushUtility(botBrain)
     end
   end
 
-  if enemyCreepsInRange > 2 and siegeOnLane == true then
-    nUtility = nUtility + 50
+  if itemManaring and enemyCreepsInRange > 2 and siegeOnLane == true then
+    nUtility = nUtility + 40
   end
 
   if itemManaring and enemyCreepsInRange > 3 then
-    nUtility = nUtility + 40
+    nUtility = nUtility + 30
   end
 
   return nUtility
@@ -387,6 +408,7 @@ local function AstrolabeUtility(botBrain)
   local tAllies = core.CopyTable(core.localUnits["AllyUnits"])
   local siegeOnLane = false
   local totalHealthLost = 0
+  local saveUnit = false
   
   for _, ally in pairs(tAllies) do
     local typeAlly = ally:GetTypeName()
@@ -395,10 +417,17 @@ local function AstrolabeUtility(botBrain)
       siegeOnLane = true
     else
       totalHealthLost = totalHealthLost + ally:GetMaxHealth() - ally:GetHealth()
+      if ally:GetHealthPercent() < 0.1 then
+        saveUnit = true
+      end
     end
 
     if totalHealthLost > 333 and siegeOnLane == true then
+      nUtility = nUtility + 45
+    elseif totalHealthLost > 500 then
       nUtility = nUtility + 55
+    elseif saveUnit then
+      nUtility = nUtility + 65
     end
 
   end
@@ -459,5 +488,29 @@ LeapBehavior["Utility"] = LeapUtility
 LeapBehavior["Execute"] = LeapExecute
 LeapBehavior["Name"] = "Leap escape"
 tinsert(behaviorLib.tBehaviors, LeapBehavior)
+
+local NukeBehavior = {}
+local function NukeUtility(botBrain)
+  local nUtility = 0;
+  local unitSelf = core.unitSelf
+
+  if nukeTarget and Vector3.Distance2D(nukeTarget:GetPosition(), unitSelf:GetPosition()) < 600 then
+    nUtility = nUtility + 60
+  end
+  
+  return nUtility
+end
+local function NukeExecute(botBrain)
+  BotEcho("Want to call on nuketarget!")
+  if call and call:CanActivate() then
+    BotEcho("Calling on nuketarget!")
+    return core.OrderAbility(botBrain, call)
+  end
+  return false
+end
+NukeBehavior["Utility"] = NukeUtility
+NukeBehavior["Execute"] = NukeExecute
+NukeBehavior["Name"] = "Nuke Behavior"
+tinsert(behaviorLib.tBehaviors, NukeBehavior)
 
 BotEcho('finished loading valkyrie_main')

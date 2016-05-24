@@ -49,9 +49,9 @@ local Clamp = core.Clamp
 
 BotEcho('loading nymphora_main...')
 
-behaviorLib.StartingItems = {"Item_PretendersCrown", "Item_MarkOfTheNovice"}
-behaviorLib.LaneItems = {"Item_MysticVestments", "Item_Intelligence5", "Item_Marchers"}
-behaviorLib.MidItems = {"Item_ManaRegen3", "Item_NomesWisdom", "Item_SpellShards", "Item_Striders"}
+behaviorLib.StartingItems = {"Item_ManaRegen3", "Item_MinorTotem"}
+behaviorLib.LaneItems = {"Item_PretendersCrown", "Item_MarkOfTheNovice", "Item_MysticVestments", "Item_Intelligence5", "Item_NomesWisdom"}
+behaviorLib.MidItems = {"Item_Marchers", "Item_SpellShards", "Item_Striders"}
 behaviorLib.LateItems = {"Item_Astrolabe", "Item_BehemothsHeart"}
 
 object.heroName = 'Hero_Fairy'

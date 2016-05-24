@@ -56,7 +56,7 @@ behaviorLib.wellUtilityAtCritical = 30
 behaviorLib.wellManaRegenMinLevel = 6
 behaviorLib.maxWellManaUtility = 2
 
-behaviorLib.StartingItems = {"Item_HealthPotion", "Item_PretendersCrown", "2 Item_MinorTotem", "Item_MarkOfTheNovice"}
+behaviorLib.StartingItems = {"Item_PretendersCrown", "2 Item_MinorTotem", "Item_MarkOfTheNovice"}
 behaviorLib.LaneItems = {"Item_Marchers", "Item_Intelligence5"}
 behaviorLib.MidItems = {"Item_Steamboots", "Item_WhisperingHelm"}
 behaviorLib.LateItems = {"Item_Protect"}
