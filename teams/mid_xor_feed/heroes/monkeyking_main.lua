@@ -87,17 +87,46 @@ function object:SkillBuild()
     return
   end
 
-  if skills.ulti:CanLevelUp() then
-    skills.ulti:LevelUp()
-  elseif skills.dash:CanLevelUp() then
-    skills.dash:LevelUp()
-  elseif skills.pole:CanLevelUp() then
-    skills.pole:LevelUp()
-  elseif skills.rock:CanLevelUp() then
-    skills.rock:LevelUp()
+  local level = unitSelf.GetLevel()
+  local ulti = skills.ulti
+  local dash = skills.dash
+  local bash = skills.bash
+  local pole = skills.pole
+
+  if level == 1 then
+    dash:LevelUp()
+  elseif level == 2 then
+    pole:LevelUp()
+  elseif level == 3 then
+    bash:LevelUp()
+  elseif level == 4 then
+    pole:LevelUp()
+  elseif level == 5 then
+    pole:LevelUp()
+  elseif level == 6 then
+    ulti:LevelUp()
+  elseif level == 7 then
+    bash:LevelUp()
+  elseif level == 8 then
+    bash:LevelUp()
+  elseif level == 9 then
+    bash:LevelUp()
+  elseif level == 9 then
+    pole:LevelUp()
+  elseif level == 10 then
+    dash:LevelUp()
+  elseif level == 11 then
+    ulti:LevelUp()
+  elseif level == 12 then
+    dash:LevelUp()
+  elseif level == 13 then
+    dash:LevelUp()
+  elseif level == 16 then
+    ulti:LevelUp()
   else
     skills.attributeBoost:LevelUp()
   end
+    
 end
 
 local function HarassHeroUtilityOverride(botBrain)

@@ -51,8 +51,8 @@ BotEcho('loading nymphora_main...')
 
 behaviorLib.StartingItems = {"Item_ManaRegen3", "Item_MinorTotem"}
 behaviorLib.LaneItems = {"Item_PretendersCrown", "Item_MarkOfTheNovice", "Item_MysticVestments", "Item_Intelligence5", "Item_NomesWisdom"}
-behaviorLib.MidItems = {"Item_Marchers", "Item_SpellShards", "Item_Striders"}
-behaviorLib.LateItems = {"Item_Astrolabe", "Item_BehemothsHeart"}
+behaviorLib.MidItems = {"Item_Striders", "Item_JadeSpire", "Item_SpellShards"}
+behaviorLib.LateItems = {"Item_BehemothsHeart"}
 
 object.heroName = 'Hero_Fairy'
 
