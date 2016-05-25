@@ -1850,6 +1850,12 @@ function behaviorLib.HarassHeroUtility(botBrain)
 		BotEcho(format("  HarassHeroNewUtility: %g", nUtility))
 	end
 
+	if unitSelf:GetLevel() == 1 and unitSelf:GetHealthPercent() < 0.9 then
+		return nUtility / 3
+	elseif unitSelf:GetLevel() == 2 and unitSelf:GetHealthPercent() < 0.8 then
+		return nUtility / 2
+	end
+
 	return nUtility
 end
 
@@ -3039,7 +3045,17 @@ function behaviorLib.HealAtWellUtility(botBrain)
 	end
        
 	behaviorLib.nLastHealAtWellUtil = nUtility
-       
+    
+	if unitSelf:GetHealthPercent() > 0.8 then
+		return 0
+	elseif unitSelf:GetHealthPercent() > 0.65 then
+		return nUtility / 3
+	elseif unitSelf:GetHealthPercent() > 0.5 then
+		return nUtility / 2
+	elseif unitSelf:GetHealthPercent() > 0.1 then
+		return nUtility * 2
+	end
+
 	return nUtility
 end
 -- people can/well override this function to heal at well better (bottle sip etc) called the whole time
