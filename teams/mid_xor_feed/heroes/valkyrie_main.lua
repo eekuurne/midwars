@@ -116,6 +116,10 @@ local nukeTarget = nil
 function object:onthinkOverride(tGameVariables)
   self:onthinkOld(tGameVariables)
 
+  if not core.unitSelf:IsAlive() then 
+    return
+  end
+
   local unitSelf = self.core.unitSelf
   local teamBotBrain = core.teamBotBrain
   local tEnemyHeroes = core.CopyTable(core.localUnits["EnemyHeroes"])

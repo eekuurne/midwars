@@ -1855,18 +1855,18 @@ function behaviorLib.HarassHeroUtility(botBrain)
 		BotEcho(format("  HarassHeroNewUtility: %g", nUtility))
 	end
 
-	if core.enemyWellAttacker and core.enemyMainBaseStructure then
-		local enemyWellPos = core.enemyWell:GetPosition()
-		local ownPos = core.unitSelf:GetPosition()
-		local dist2 = Vector3.Distance2DSq(enemyWellPos, ownPos)
-		local dist2shrine = Vector3.Distance2DSq(core.enemyMainBaseStructure:GetPosition(), ownPos)
-		local threshold = 2500*2500
-		local shrineThreshold = 1500*1500
-		if dist2 < threshold and dist2shrine < shrineThreshold then
+	if core.enemyWell then
+		--team 2 well (8588,11719)
+		--team 1 well (3098,7008)
+		local team = core.unitSelf:GetTeam()
+		local x = core.unitSelf:GetPosition().x
+		local y = core.unitSelf:GetPosition().y
+		--hardcode line over which units will not chase
+		if (team == 1 and y > 11000) or (team == 2 and x < 4000) then
 			BotEcho("NOPE NOPE NOPE NOPE NOPE")
 			return 0
 		end
-	else
+	end
 
 	if unitSelf:GetLevel() == 1 and unitSelf:GetHealthPercent() < 0.9 then
 		return nUtility / 3

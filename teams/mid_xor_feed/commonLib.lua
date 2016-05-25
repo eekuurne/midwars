@@ -351,6 +351,9 @@ local function KillShrineUtility(botBrain)
   if not core.enemyMainBaseStructure then 
     return 0 
   end
+  if core.enemyMainBaseStructure:IsInvulnerable() then
+    return 0
+  end
   local ownPos = core.unitSelf:GetPosition()
   local shrinePos = core.enemyMainBaseStructure:GetPosition()
   local dist2 = Vector3.Distance2DSq(ownPos, shrinePos)
