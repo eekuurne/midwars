@@ -354,7 +354,7 @@ local function KillShrineUtility(botBrain)
   local ownPos = core.unitSelf:GetPosition()
   local shrinePos = core.enemyMainBaseStructure:GetPosition()
   local dist2 = Vector3.Distance2DSq(ownPos, shrinePos)
-  if dist2 < 1500*1500 then
+  if dist2 < 1000*1000 then
     return 40
   else
     return 0
