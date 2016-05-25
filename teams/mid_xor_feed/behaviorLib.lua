@@ -349,6 +349,10 @@ function behaviorLib.PositionSelfTraverseLane(botBrain)
 	local bDebugLines = false
 	local bDebugEchos = false
 
+	if HoN.GetMatchTime() <= 0 then
+		return core.allyMainBaseStructure:GetPosition()
+	end
+
 	--if botBrain.myName == 'ShamanBot' then bDebugEchos = true bDebugLines = true end
 
 	local myPos = core.unitSelf:GetPosition()
@@ -1197,7 +1201,7 @@ end
 function behaviorLib.PreGameUtility(botBrain)
 	local utility = 0
 
-	if HoN:GetMatchTime() <= 0 then
+	if HoN:GetMatchTime() <= -10000 then
 		utility = 98
 	end
 
@@ -1222,6 +1226,7 @@ behaviorLib.PreGameBehavior["Utility"] = behaviorLib.PreGameUtility
 behaviorLib.PreGameBehavior["Execute"] = behaviorLib.PreGameExecute
 behaviorLib.PreGameBehavior["Name"] = "PreGame"
 tinsert(behaviorLib.tBehaviors, behaviorLib.PreGameBehavior)
+
 
 
 ------------------------------------
@@ -1850,6 +1855,20 @@ function behaviorLib.HarassHeroUtility(botBrain)
 		BotEcho(format("  HarassHeroNewUtility: %g", nUtility))
 	end
 
+	if core.enemyWellAttacker and core.enemyMainBaseStructure then
+		local enemyWellPos = core.enemyWell:GetPosition()
+		local ownPos = core.unitSelf:GetPosition()
+		local dist2 = Vector3.Distance2DSq(enemyWellPos, ownPos)
+		local dist2shrine = Vector3.Distance2DSq(core.enemyMainBaseStructure:GetPosition(), ownPos)
+		local threshold = 2500*2500
+		local shrineThreshold = 1500*1500
+		if dist2 < threshold and dist2shrine < shrineThreshold then
+			BotEcho("NOPE NOPE NOPE NOPE NOPE")
+			return 0
+		end
+	else
+	end
+
 	return nUtility
 end
 
@@ -1863,8 +1882,8 @@ function behaviorLib.HarassHeroExecute(botBrain)
 
 	local unitSelf = core.unitSelf
 	local unitTarget = behaviorLib.heroTarget
-	if behaviorLib.heroTargetOverride then
-		unitTarget = behaviorLib.heroTargetOverride
+	if core.teamBotBrain.heroTargetOverride then
+		unitTarget = core.teamBotBrain.heroTargetOverride
 	end
 	local vecTargetPos = (unitTarget and unitTarget:GetPosition()) or nil
 

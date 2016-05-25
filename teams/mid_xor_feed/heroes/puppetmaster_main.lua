@@ -251,6 +251,8 @@ behaviorLib.CustomHarassUtility = HarassHeroUtilityOverride
 function object:onthinkOverride(tGameVariables)
   self:onthinkOld(tGameVariables)
 
+  if not core.localUnits then return end
+
   local enemies = core.localUnits['EnemyUnits']
 
   local overrideTarget = false
@@ -258,13 +260,13 @@ function object:onthinkOverride(tGameVariables)
   for i, unit in pairs(enemies) do
 
     if unit:GetTypeName() == "Pet_PuppetMaster_Ability4" and unit:GetTeam() ~= core.unitSelf:GetTeam() then
-      behaviorLib.heroTargetOverride = unit
+      core.teamBotBrain.heroTargetOverride = unit
       overrideTarget = true
     end
   end 
 
   if not overrideTarget then 
-    behaviorLib.heroTargetOverride = nil
+    core.teamBotBrain.heroTargetOverride = nil
   end
 
   -- custom code here

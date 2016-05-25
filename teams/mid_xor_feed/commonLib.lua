@@ -336,13 +336,8 @@ local function DenyTowerExecute(botBrain)
     local range = core.unitSelf:GetAttackRange()
     local ownPos = core.unitSelf:GetPosition()
     local towerPos = object.towerToDeny:GetPosition()
-    if Vector3.Distance2DSq(ownPos, towerPos) > range*range then
-      core.DrawXPosition(towerPos, "yellow", 100)
-      return core.OrderMoveToPosClamp(botBrain, core.unitSelf, towerPos)
-    else
-      core.DrawXPosition(towerPos, "red", 100)
-      return core.OrderAttackClamp(botBrain, core.unitSelf, object.towerToDeny)
-    end
+    core.DrawXPosition(towerPos, "red", 100)
+    return core.OrderAttackClamp(botBrain, core.unitSelf, object.towerToDeny)
   end
 end
 
@@ -350,3 +345,34 @@ DenyTowerBehavior["Utility"] = DenyTowerUtility
 DenyTowerBehavior["Execute"] = DenyTowerExecute
 DenyTowerBehavior["Name"] = "Deny tower"
 tinsert(behaviorLib.tBehaviors, DenyTowerBehavior)
+
+local KillShrineBehavior = {}
+local function KillShrineUtility(botBrain)
+  if not core.enemyMainBaseStructure then 
+    return 0 
+  end
+  local ownPos = core.unitSelf:GetPosition()
+  local shrinePos = core.enemyMainBaseStructure:GetPosition()
+  local dist2 = Vector3.Distance2DSq(ownPos, shrinePos)
+  if dist2 < 1500*1500 then
+    return 40
+  else
+    return 0
+  end
+end
+
+local function KillShrineExecute(botBrain)
+  if core.enemyMainBaseStructure then
+    BotEcho("KILL SHRINE KILL SHRINE")
+    local range = core.unitSelf:GetAttackRange()
+    local ownPos = core.unitSelf:GetPosition()
+    local shrinePos = core.enemyMainBaseStructure:GetPosition()
+    core.DrawXPosition(shrinePos, "red", 100)
+    return core.OrderAttackClamp(botBrain, core.unitSelf, object.towerToDeny)
+  end
+end
+
+KillShrineBehavior["Utility"] = KillShrineUtility
+KillShrineBehavior["Execute"] = KillShrineExecute
+KillShrineBehavior["Name"] = "Kill shrine"
+tinsert(behaviorLib.tBehaviors, KillShrineBehavior)

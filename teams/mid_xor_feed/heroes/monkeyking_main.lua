@@ -87,10 +87,10 @@ function object:SkillBuild()
     return
   end
 
-  local level = unitSelf.GetLevel()
+  local level = unitSelf:GetLevel()
   local ulti = skills.ulti
   local dash = skills.dash
-  local bash = skills.bash
+  local rock = skills.rock
   local pole = skills.pole
 
   if level == 1 then
@@ -98,7 +98,7 @@ function object:SkillBuild()
   elseif level == 2 then
     pole:LevelUp()
   elseif level == 3 then
-    bash:LevelUp()
+    rock:LevelUp()
   elseif level == 4 then
     pole:LevelUp()
   elseif level == 5 then
@@ -106,11 +106,11 @@ function object:SkillBuild()
   elseif level == 6 then
     ulti:LevelUp()
   elseif level == 7 then
-    bash:LevelUp()
+    rock:LevelUp()
   elseif level == 8 then
-    bash:LevelUp()
+    rock:LevelUp()
   elseif level == 9 then
-    bash:LevelUp()
+    rock:LevelUp()
   elseif level == 9 then
     pole:LevelUp()
   elseif level == 10 then
