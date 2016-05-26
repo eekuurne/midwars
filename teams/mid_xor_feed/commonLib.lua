@@ -351,7 +351,8 @@ local function KillShrineUtility(botBrain)
   if not core.enemyMainBaseStructure then 
     return 0 
   end
-  if core.enemyMainBaseStructure:IsInvulnerable() then
+  if core.enemyMainBaseStructure:GetHealthPercent() and 
+    core.enemyMainBaseStructure:GetHealthPercent() < 1 then
     return 0
   end
   local ownPos = core.unitSelf:GetPosition()

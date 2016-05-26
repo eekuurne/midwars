@@ -15,8 +15,8 @@ object.bAbilityCommands = true
 object.bOtherCommands = true
 
 object.bReportBehavior = false
-object.bDebugUtility = false
-object.bDebugExecute = false
+object.bDebugUtility = true
+object.bDebugExecute = true
 object.bDebugEchos = false
 object.bDebugLines = false
 
@@ -98,7 +98,7 @@ function object:SkillBuild()
   end
 end
 
-behaviorLib.StartingItems = {"Item_CrushingClaws", "Item_PretendersCrown", "Item_MinorTotem"}
+behaviorLib.StartingItems = {"2 Item_MinorTotem", "Item_ManaBattery", "Item_PowerSupply"}
 behaviorLib.LaneItems = {"Item_MysticVestments", "Item_Marchers", "Item_Strength5", "2 Item_TrinketOfRestoration"}
 behaviorLib.MidItems = {"Item_Lifetube"}
 behaviorLib.LateItems = {"Item_BehemothsHeart"}
@@ -261,12 +261,12 @@ local function HookUtility(botBrain)
   local hook, ulti = skills.hook, skills.ulti
   if hook and hook:CanActivate() then
     local unitTarget = DetermineHookTarget(hook)
-    if unitTarget and (unitTarget:GetHealthPercent() < 0.5 or 
-      (ulti:CanActivate() and 
-        (ulti:GetManaCost() + hook:GetManaCost() < core.unitSelf:GetMana()))) then
+    if unitTarget and ((unitTarget:GetHealthPercent() < 0.5) or 
+      (ulti:CanActivate() and (ulti:GetManaCost() + hook:GetManaCost() < core.unitSelf:GetMana())) or
+      (Vector3.Distance2DSq(unitTarget:GetPosition(), core.unitSelf:GetPosition()) > 550*550 and core.NumberElements(core.localUnits["AllyHeroes"]) > 1)) then
       hookTarget = unitTarget:GetPosition()
       core.DrawXPosition(hookTarget, "green", 100)
-      return 60
+      return 200
     else  
       return 0
     end

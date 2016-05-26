@@ -51,8 +51,8 @@ BotEcho('loading valkyrie_main...')
 object.heroName = 'Hero_Valkyrie'
 
 
-behaviorLib.StartingItems = {"Item_MysticPotpourri"}
-behaviorLib.LaneItems = {"Item_PretendersCrown", "Item_MarkOfTheNovice", "Item_Intelligence5", "Item_Replenish", "Item_PretendersCrown", "Item_CrushingClaws", "Item_Strength5", "Item_Astrolabe"}
+behaviorLib.StartingItems = {"Item_MysticPotpourri", "2 Item_MinorTotem", "Item_ManaBattery"}
+behaviorLib.LaneItems = {"Item_PowerSupply", "Item_Replenish", "Item_PretendersCrown", "Item_CrushingClaws", "Item_Strength5", "Item_Astrolabe"}
 behaviorLib.MidItems = {"Item_Marchers", "Item_EnhancedMarchers", "Item_Pierce"}
 behaviorLib.LateItems = {"Item_Immunity", "Item_BehemothsHeart"}
 

@@ -585,6 +585,11 @@ function behaviorLib.UseBatterySupplyUtility(botBrain)
 		local nBatterySupplyHealthUtility = behaviorLib.BatterySupplyHealthUtilFn(nHealthMissing, nCharges)
 		local nBatterySupplyManaUtility = behaviorLib.BatterySupplyManaUtilFn(nManaMissing, nCharges)
 		
+		--[[if core.unitSelf:GetHealthPercent() < 0.6 then 
+							BotEcho("USE SUPPLY")
+							return 100
+						end]]
+
 		return max(
 			nBatterySupplyHealthUtility * .8 + nBatterySupplyManaUtility * .2, --health
 			nBatterySupplyManaUtility * .8 + nBatterySupplyHealthUtility * .2  --mana
@@ -975,7 +980,7 @@ function behaviorLib.PlatedGreavesUtility(botBrain)
 	local unitSelf = core.unitSelf
 	behaviorLib.itemPlatedGreaves = core.GetItem("Item_PlatedGreaves")
 	
-	if (behaviorLib.itemPlatedGreaves and behaviorLib.itemPlatedGreaves:CanActivate() and not unitSelf:HasState("State_PlatedGreaves_Armor") and core.GetLastBehaviorName(botBrain) == "Push") then
+	if (behaviorLib.itemPlatedGreaves and behaviorLib.itemPlatedGreaves:CanActivate() and not unitSelf:HasState("State_PlatedGreaves_Armor") and (core.NumberElements(core.localUnits["AllyUnits"]) > 4)) then
 		return 9999
 	else
 		return 0

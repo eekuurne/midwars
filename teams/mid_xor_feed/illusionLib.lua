@@ -63,12 +63,14 @@ function illusionLib.updateIllusions(botBrain)
 	local nMyUniqueID = core.unitSelf:GetUniqueID()
 
 	illusionLib.tIllusions = {}
-	local tPossibleIllusions = core.tControllableUnits["InventoryUnits"]
+	local tPossibleIllusions = core.tControllableUnits["AllUnits"]
 	if tPossibleIllusions ~= nil then
 		for nUID, unit in pairs(tPossibleIllusions) do
-			if unit:IsHero() and nUID ~= nMyUniqueID and unit:GetOwnerPlayerID() == nMyPlayerID then
-				tinsert(illusionLib.tIllusions, unit)
-			end
+			--if unit:IsHero() and nUID ~= nMyUniqueID and unit:GetOwnerPlayerID() == nMyPlayerID then
+			-- extend to all controllable units	
+			--BotEcho("???????????????????????????????????????????????????????? inserting "..unit:GetTypeName())
+			tinsert(illusionLib.tIllusions, unit)
+			--end
 		end
 	end
 end
