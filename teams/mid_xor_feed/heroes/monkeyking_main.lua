@@ -52,9 +52,9 @@ BotEcho('loading monkeyking_main...')
 object.heroName = 'Hero_MonkeyKing'
 
 behaviorLib.StartingItems = {"2 Item_MinorTotem", "Item_ManaBattery", "2 Item_DuckBoots", "Item_PowerSupply"}
-behaviorLib.LaneItems = {"Item_IronBuckler", "Item_GuardianRing", "Item_Marchers", "Item_SolsBulwark", "2 Item_Punchdagger"}
+behaviorLib.LaneItems = {"Item_IronShield", "Item_GuardianRing", "Item_Marchers", "Item_SolsBulwark", "Item_Punchdagger", "Item_EnhancedMarchers"}
 behaviorLib.MidItems = {"Item_Platemail", "Item_Warpcleft", "Item_DaemonicBreastplate"}
-behaviorLib.LateItems = {"Item_Strength6", "Item_StrengthAgility", "Item_Beastheart", "Item_AxeOfTheMalphai", "Item_BehemothsHeart"}
+behaviorLib.LateItems = {"Item_Strength6", "Item_StrengthAgility", "Item_Beastheart", "Item_AxeOfTheMalphai", "Item_BehemothsHeart", "Item_Voulge" ,"Item_Weapon3"}
 
 --------------------------------
 -- Lanes
@@ -193,7 +193,7 @@ local function HarassHeroExecuteOverride(botBrain)
   local unitTarget = behaviorLib.heroTarget
 
   if unitTarget == nil or not unitTarget:IsValid() then
-    BotEcho("Fail 1")
+    --BotEcho("Fail 1")
     return false --can not execute, move on to the next behavior
   end
 
@@ -213,17 +213,17 @@ local function HarassHeroExecuteOverride(botBrain)
     local facing = core.HeadingDifference(unitSelf, unitTarget:GetPosition())
 
     if not bActionTaken and stun and stun:CanActivate() and Vector3.Distance2D(unitSelf:GetPosition(), unitTarget:GetPosition()) < 300 and facing < 0.3 then
-      BotEcho("STUN")
+      --BotEcho("STUN")
       bActionTaken = core.OrderAbility(botBrain, stun)
     end
 
     if not bActionTaken and dash and dash:CanActivate() and Vector3.Distance2D(unitSelf:GetPosition(), unitTarget:GetPosition()) < dash:GetRange() and facing < 0.3 then
-      BotEcho("DASH")
+      --BotEcho("DASH")
       bActionTaken = core.OrderAbility(botBrain, dash)
     end
 
     if not bActionTaken and pole and pole:CanActivate() and Vector3.Distance2D(unitSelf:GetPosition(), unitTarget:GetPosition()) < pole:GetRange() then
-      BotEcho("BASH")
+      --BotEcho("BASH")
       bActionTaken = core.OrderAbilityEntity(botBrain, pole, unitTarget)
     end
 

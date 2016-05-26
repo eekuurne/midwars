@@ -53,7 +53,7 @@ object.heroName = 'Hero_Valkyrie'
 
 behaviorLib.StartingItems = {"Item_MysticPotpourri", "2 Item_MinorTotem", "Item_ManaBattery", "Item_PowerSupply"}
 behaviorLib.LaneItems = {"Item_Replenish", "Item_PretendersCrown", "Item_CrushingClaws", "Item_Strength5", "Item_Astrolabe"}
-behaviorLib.MidItems = {"Item_Marchers", "Item_EnhancedMarchers", "Item_Warhammer", "Item_Pierce 2"}
+behaviorLib.MidItems = {"Item_Marchers", "Item_Punchdagger", "Item_EnhancedMarchers", "Item_Warhammer", "Item_Pierce 2"}
 behaviorLib.LateItems = {"Item_Immunity", "Item_BehemothsHeart"}
 
 
@@ -485,9 +485,9 @@ local function NukeUtility(botBrain)
   return nUtility
 end
 local function NukeExecute(botBrain)
-  BotEcho("Want to call on nuketarget!")
+  --BotEcho("Want to call on nuketarget!")
   if call and call:CanActivate() then
-    BotEcho("Calling on nuketarget!")
+    --BotEcho("Calling on nuketarget!")
     return core.OrderAbility(botBrain, call)
   end
   return false

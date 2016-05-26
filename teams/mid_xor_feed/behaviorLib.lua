@@ -3498,7 +3498,7 @@ function behaviorLib.SortInventoryAndStash(botBrain)
 			if curItem and not curItem:IsRecipe() then
 				name = curItem:GetName()
 			end
-			BotEcho("  Checking if "..tostring(slot)..", "..name.." is a boot")
+			--BotEcho("  Checking if "..tostring(slot)..", "..name.." is a boot")
 		end
 
 		if curItem and (slot > 6 or slotsAvailable[slot] ~= false) then
@@ -3506,12 +3506,14 @@ function behaviorLib.SortInventoryAndStash(botBrain)
 				if curItem:GetName() == bootName then
 
 					if behaviorLib.printShopDebug then
-						BotEcho("    Boots found")
+						--BotEcho("    Boots found")
 					end
 
 					for i = 1, #slotsAvailable, 1 do
 						if slotsAvailable[i] then
-							if behaviorLib.printShopDebug then BotEcho("    Swapping "..inventory[slot]:GetName().." into slot "..i) end
+							if behaviorLib.printShopDebug then 
+								--BotEcho("    Swapping "..inventory[slot]:GetName().." into slot "..i) 
+							end
 
 							unitSelf:SwapItems(slot, i)
 							slotsAvailable[i] = false
@@ -3547,7 +3549,7 @@ function behaviorLib.SortInventoryAndStash(botBrain)
 			if curItem and not curItem:IsRecipe() then
 				name = curItem:GetName()
 			end
-			BotEcho("  Checking if "..tostring(slot)..", "..name.." has magic defense")
+			--BotEcho("  Checking if "..tostring(slot)..", "..name.." has magic defense")
 		end
 
 		if curItem and (slot > 4 or slotsAvailable[slot] ~= false) then
@@ -3568,80 +3570,6 @@ function behaviorLib.SortInventoryAndStash(botBrain)
 				if bFound then
 					break
 				end
-			end
-		end
-
-		if bFound then
-			break
-		end
-	end
-
-	--homecoming stone
-	bFound = false
-	local tpName = core.idefHomecomingStone:GetName()
-	for slot = 1, 12, 1 do
-		local curItem = inventory[slot]
-		if slotsLeft < 1 then
-			break
-		end
-
-		if behaviorLib.printShopDebug then
-			local name = "EMPTY_SLOT"
-			if curItem and not curItem:IsRecipe() then
-				name = curItem:GetName()
-			end
-			BotEcho("  Checking if "..tostring(slot)..", "..name.." is a homecoming stone")
-		end
-
-		if curItem and (slot > 6 or slotsAvailable[slot] ~= false) then
-			if curItem:GetName() == tpName then
-				for i = 1, #slotsAvailable, 1 do
-					if slotsAvailable[i] then
-						unitSelf:SwapItems(slot, i)
-						slotsAvailable[i] = false
-						slotsLeft = slotsLeft - 1
-						inventory[slot], inventory[i] = inventory[i], inventory[slot]
-						break
-					end
-				end
-				bFound = true
-			end
-		end
-
-		if bFound then
-			break
-		end
-	end
-
-	--portal key
-	bFound = false
-	local sPortalKeyName = behaviorLib.sPortalKeyName
-	for slot = 1, 12, 1 do
-		local curItem = inventory[slot]
-		if slotsLeft < 1 then
-			break
-		end
-
-		if behaviorLib.printShopDebug then
-			local name = "EMPTY_SLOT"
-			if curItem and not curItem:IsRecipe() then
-				name = curItem:GetName()
-			end
-			BotEcho("  Checking if "..tostring(slot)..", "..name.." is a homecoming stone")
-		end
-
-		if curItem and (slot > 6 or slotsAvailable[slot] ~= false) then
-			if curItem:GetName() == sPortalKeyName then
-				for i = 1, #slotsAvailable, 1 do
-					if slotsAvailable[i] then
-						unitSelf:SwapItems(slot, i)
-						slotsAvailable[i] = false
-						slotsLeft = slotsLeft - 1
-						inventory[slot], inventory[i] = inventory[i], inventory[slot]
-						break
-					end
-				end
-				bFound = true
 			end
 		end
 
@@ -3806,6 +3734,8 @@ function behaviorLib.DetermineNextItemDef(botBrain)
 	end
 
 	--if we have this, remove it from our active list
+	local remaining = core.NumberElements(core.unitSelf:GetItemComponentsRemaining(idefCurrent))
+	--BotEcho("=========================== HAVE BUYINGS NEXT ITEM? CURRENT NEEDS "..remaining.." ~~~~~~~~~~~~~~~~~~~")
 	if numValid >= num then
 		if behaviorLib.printShopDebug then BotEcho('Found it! Removing it from the list') end
 		if #behaviorLib.curItemList > 1 then
@@ -3851,7 +3781,6 @@ end
 function behaviorLib.ShopUtility(botBrain)
 	--BotEcho('CanAccessStash: '..tostring(core.unitSelf:CanAccessStash()))
 
- 
 	local bCanAccessShop = core.unitSelf:CanAccessStash()
 
 	--just got into shop access, try buying
@@ -3883,7 +3812,6 @@ function behaviorLib.ShopUtility(botBrain)
 
 	return utility
 end
-
 
 function behaviorLib.ShopExecute(botBrain)
 --[[
@@ -3919,9 +3847,24 @@ Current algorithm:
 	local bGoldReduced = false
 	local tInventory = core.unitSelf:GetInventory(true)
 	local nextItemDef = behaviorLib.DetermineNextItemDef(botBrain)
-	local bMyTeamHasHuman = core.MyTeamHasHuman()
-	local bBuyTPStone = (core.nDifficulty ~= core.nEASY_DIFFICULTY) or bMyTeamHasHuman
   local atShop = core.unitSelf:CanAccessStash()
+  --behaviorLib.printShopDebug = true
+
+  --[[local emptyStashSlots = 0
+  for slot = 7, 12, 1 do
+    local curItem = tInventory[slot]
+    if not curItem then
+      emptyStashSlots = emptyStashSlots + 1
+    end
+  end
+
+  BotEcho("Stashslots: "..emptyStashSlots)
+  if emptyStashSlots < 6 and object.skills.courier:CanActivate() then 
+	  BotEcho("----------------------------- Something in stash ---------------------")
+	  core.OrderAbility(botBrain, object.skills.courier)
+	  behaviorLib.finishedBuying = true
+	  return true
+	end]]
 
   --if not atShop and object.needsStashAccess then
   --	return 
@@ -3954,15 +3897,27 @@ Current algorithm:
 			if atShop then
 				behaviorLib.SellLowestItems(botBrain, #componentDefs - slotsOpen - 1)
 			else
-				object.needsStashAccess = true
+				BotEcho("SHOPPING FAIL: NO SPACE")
+				--behaviorLib.finishedBuying = true
+				return false
 			end
+
 		elseif #componentDefs == 0 then
-			behaviorLib.ShuffleCombine(botBrain, nextItemDef, unitSelf)
+			if atShop then
+				behaviorLib.ShuffleCombine(botBrain, nextItemDef, unitSelf)
+				--behaviorLib.finishedBuying = true
+				return true
+			else
+				BotEcho("SHOPPING FAIL: COMPONENTS EXIST")
+				--behaviorLib.finishedBuying = true
+				return false
+			end
 		end
 
 		local nGoldAmountBefore = botBrain:GetGold()
 		
 		if nextItemDef ~= nil and unitSelf:GetItemCostRemaining(nextItemDef) < nGoldAmountBefore then
+			BotEcho("Remaining cost: "..unitSelf:GetItemCostRemaining(nextItemDef))
 			unitSelf:PurchaseRemaining(nextItemDef)
 		end
 
@@ -3990,7 +3945,7 @@ Current algorithm:
 
 	if not atShop and bGoldReduced then 
 		courier = object.skills.courier
-	  BotEcho("----------------------------- Buying something ---------------------")
+	  BotEcho("----------------------------- Bought something ---------------------")
 	  if not courier:CanActivate() then
 	    if courierDebug then
 	      BotEcho("Cannot use courier")
