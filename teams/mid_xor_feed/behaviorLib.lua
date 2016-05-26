@@ -1227,7 +1227,46 @@ behaviorLib.PreGameBehavior["Execute"] = behaviorLib.PreGameExecute
 behaviorLib.PreGameBehavior["Name"] = "PreGame"
 tinsert(behaviorLib.tBehaviors, behaviorLib.PreGameBehavior)
 
+----------------------------------
+--	Retard check
+--
+--	Utility: 150 if remained still for too long
+--	Execute: Hold in the fountain
+----------------------------------
+object.lastPosition = nil
+object.stayedStill = 0
 
+function behaviorLib.RetardCheckUtility(botBrain)
+	local utility = 0
+	local unitSelf = core.unitSelf
+
+	if unitSelf:GetPosition() == object.lastPosition then
+		BotEcho("Hero pysyi paikallaan: ")
+		BotEcho(stayedStill)
+		object.stayedStill = object.stayedStill + 1
+	else
+		object.stayedStill = 0
+	end
+
+	object.lastPosition = unitSelf:GetPosition()
+
+	if object.stayedStill > 150 then
+		utility = 150
+	end
+
+	return utility
+end
+
+function behaviorLib.RetardCheckExecute(botBrain)
+	object.stayedStill = 0
+	BotEcho("I'm a retard!")
+end
+
+behaviorLib.RetardCheckBehavior = {}
+behaviorLib.RetardCheckBehavior["Utility"] = behaviorLib.RetardCheckUtility
+behaviorLib.RetardCheckBehavior["Execute"] = behaviorLib.RetardCheckExecute
+behaviorLib.RetardCheckBehavior["Name"] = "RetardCheck"
+tinsert(behaviorLib.tBehaviors, behaviorLib.RetardCheckBehavior)
 
 ------------------------------------
 --          AttackCreeps          --
@@ -1868,10 +1907,59 @@ function behaviorLib.HarassHeroUtility(botBrain)
 		end
 	end
 
+	--Alkufeedesto
+	local tEnemyTowers = core.localUnits["EnemyTowers"]
+	--for _, enemyTower in pairs(tEnemyTowers) do
+		if unitSelf:GetLevel() == 1 then
+			nUtility = nUtility / 6
+			BotEcho("En haluakaan feedata!")
+		elseif unitSelf:GetLevel() == 2 then
+			nUtility = nUtility / 5
+			BotEcho("En haluakaan feedata!")
+		elseif unitSelf:GetLevel() == 3 then
+			nUtility = nUtility / 4
+			BotEcho("En haluakaan feedata!")
+		end
+    --end
+
+    	-- Escape if there are too many enemies and too few allies
+	local allies = core.localUnits["AllyHeroes"]
+	local enemies = core.localUnits["EnemyHeroes"]
+
+	local nearbyAllyIsLowHealth = false
+	local nearbyAllies = 0
+	local nearbyAlliesHealth = 0
+	for _, ally in pairs(allies) do
+		if Vector3.Distance2D(ally:GetPosition(), unitSelf:GetPosition()) < 1000 then
+			nearbyAlliesHealth = nearbyAlliesHealth + ally:GetHealth()
+      		nearbyAllies = nearbyAllies + 1
+		end
+		if Vector3.Distance2D(ally:GetPosition(), unitSelf:GetPosition()) < 200 and ally:GetHealthPercent() < 0.5 then
+			nearbyAllyIsLowHealth = true
+		end
+    end
+
+    local nearbyEnemies = 0
+    local nearbyEnemiesHealth = 0
+	for _, enemy in pairs(enemies) do
+		if Vector3.Distance2D(enemy:GetPosition(), unitSelf:GetPosition()) < 1000 then
+			nearbyEnemiesHealth = nearbyEnemiesHealth + enemy:GetHealth()
+      		nearbyEnemies = nearbyEnemies + 1
+		end
+    end
+
+    local relativeTeamHealth = nearbyAlliesHealth / nearbyEnemiesHealth
+
+	if nearbyAllyIsLowHealth == true and unitSelf:GetHealthPercent() > 0.8 and relativeTeamHealth > 0.6 then
+		nUtility = nUtility * 2
+	end
+
+    -- and Vector3.Distance2D(enemyTower:GetPosition(), unitSelf:GetPosition()) < 1500
+
 	if unitSelf:GetLevel() == 1 and unitSelf:GetHealthPercent() < 0.9 then
-		return nUtility / 3
+		nUtility = nUtility / 3
 	elseif unitSelf:GetLevel() == 2 and unitSelf:GetHealthPercent() < 0.8 then
-		return nUtility / 2
+		nUtility = nUtility / 2
 	end
 
 	return nUtility
@@ -2853,6 +2941,7 @@ function behaviorLib.RetreatFromThreatUtility(botBrain)
 	local enemies = core.localUnits["EnemyHeroes"]
 
 	local nearbyAllyIsLowLevel = false
+	local nearbyAllyIsLowHealth = false
 	local nearbyAllies = 0
 	local nearbyAlliesHealth = 0
 	for _, ally in pairs(allies) do
@@ -2862,6 +2951,11 @@ function behaviorLib.RetreatFromThreatUtility(botBrain)
       		if ally:GetLevel() < 10 then
       			nearbyAllyIsLowLevel = true
       		end
+		end
+		if Vector3.Distance2D(ally:GetPosition(), unitSelf:GetPosition()) < 200 then
+			if ally:GetHealthPercent() < 0.5 then
+				nearbyAllyIsLowHealth = true
+			end
 		end
     end
 
@@ -2883,15 +2977,19 @@ function behaviorLib.RetreatFromThreatUtility(botBrain)
 	    	underDogUtility = underDogUtility + 20
 		elseif relativeTeamHealth < 0.7 then
 	    	underDogUtility = underDogUtility + 15
-	    elseif relativeTeamHealth < 0.8 and unitSelf:GetHealthPercent() < 0.9 then
+	    elseif relativeTeamHealth < 0.8 and unitSelf:GetHealthPercent() < 0.9 and nearbyAllyIsLowHealth == false then
 	    	underDogUtility = underDogUtility + 10
-	    elseif relativeTeamHealth < 0.9 and unitSelf:GetHealthPercent() < 0.8 then
+	    elseif relativeTeamHealth < 0.9 and unitSelf:GetHealthPercent() < 0.8 and nearbyAllyIsLowHealth == false then
 	    	underDogUtility = underDogUtility + 5
 	    elseif relativeTeamHealth > 1.4 and unitSelf:GetHealthPercent() > 0.6 and unitSelf:GetLevel() > 2 then
 	    	underDogUtility = underDogUtility - 5
 	    elseif relativeTeamHealth > 1.6 and unitSelf:GetHealthPercent() > 0.4 and unitSelf:GetLevel() > 1 then
 	    	underDogUtility = underDogUtility - 10
 	    end
+	end
+
+	if nearbyAllyIsLowHealth == true and underDogUtility > 0 then
+		underDogUtility = underDogUtility / 3
 	end
 
     if nearbyEnemies > nearbyAllies then
@@ -3100,14 +3198,18 @@ function behaviorLib.HealAtWellUtility(botBrain)
        
 	behaviorLib.nLastHealAtWellUtil = nUtility
     
-	if unitSelf:GetHealthPercent() > 0.8 then
-		return 0
+    if unitSelf:GetHealthPercent() > 0.9 then
+		return nUtility / 5
+	elseif unitSelf:GetHealthPercent() > 0.8 then
+		return nUtility / 4
 	elseif unitSelf:GetHealthPercent() > 0.65 then
 		return nUtility / 3
 	elseif unitSelf:GetHealthPercent() > 0.5 then
 		return nUtility / 2
-	elseif unitSelf:GetHealthPercent() > 0.1 then
+	elseif unitSelf:GetHealthPercent() > 0.15 then
 		return nUtility * 2
+	elseif unitSelf:GetHealthPercent() > 0.1 then
+		return nUtility * 3
 	end
 
 	return nUtility
