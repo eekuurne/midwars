@@ -2854,8 +2854,10 @@ function behaviorLib.RetreatFromThreatUtility(botBrain)
 
 	local nearbyAllyIsLowLevel = false
 	local nearbyAllies = 0
+	local nearbyAlliesHealth = 0
 	for _, ally in pairs(allies) do
 		if Vector3.Distance2D(ally:GetPosition(), unitSelf:GetPosition()) < 1000 then
+			nearbyAlliesHealth = nearbyAlliesHealth + ally:GetHealth()
       		nearbyAllies = nearbyAllies + 1
       		if ally:GetLevel() < 10 then
       			nearbyAllyIsLowLevel = true
@@ -2864,14 +2866,36 @@ function behaviorLib.RetreatFromThreatUtility(botBrain)
     end
 
     local nearbyEnemies = 0
+    local nearbyEnemiesHealth = 0
 	for _, enemy in pairs(enemies) do
-		if Vector3.Distance2D(enemy:GetPosition(), unitSelf:GetPosition()) < 1200 then
+		if Vector3.Distance2D(enemy:GetPosition(), unitSelf:GetPosition()) < 1000 then
+			nearbyEnemiesHealth = nearbyEnemiesHealth + enemy:GetHealth()
       		nearbyEnemies = nearbyEnemies + 1
 		end
     end
 
+    local relativeTeamHealth = nearbyAlliesHealth / nearbyEnemiesHealth
+
+    if nearbyEnemies > 0 then
+	    if relativeTeamHealth < 0.5 then
+	    	underDogUtility = underDogUtility + 25
+	    elseif relativeTeamHealth < 0.6 then
+	    	underDogUtility = underDogUtility + 20
+		elseif relativeTeamHealth < 0.7 then
+	    	underDogUtility = underDogUtility + 15
+	    elseif relativeTeamHealth < 0.8 and unitSelf:GetHealthPercent() < 0.9 then
+	    	underDogUtility = underDogUtility + 10
+	    elseif relativeTeamHealth < 0.9 and unitSelf:GetHealthPercent() < 0.8 then
+	    	underDogUtility = underDogUtility + 5
+	    elseif relativeTeamHealth > 1.4 and unitSelf:GetHealthPercent() > 0.6 and unitSelf:GetLevel() > 2 then
+	    	underDogUtility = underDogUtility - 5
+	    elseif relativeTeamHealth > 1.6 and unitSelf:GetHealthPercent() > 0.4 and unitSelf:GetLevel() > 1 then
+	    	underDogUtility = underDogUtility - 10
+	    end
+	end
+
     if nearbyEnemies > nearbyAllies then
-    	underDogUtility = underDogUtility + (nearbyEnemies - nearbyAllies) * 5
+    	underDogUtility = underDogUtility + (nearbyEnemies - nearbyAllies) * 2
     end
 
     -- Escape if too close to tower in early game
