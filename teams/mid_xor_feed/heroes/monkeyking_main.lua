@@ -51,10 +51,10 @@ BotEcho('loading monkeyking_main...')
 
 object.heroName = 'Hero_MonkeyKing'
 
-behaviorLib.StartingItems = {"Item_DuckBoots", "Item_IronBuckler", "Item_GuardianRing"}
-behaviorLib.LaneItems = {"Item_DuckBoots", "Item_Marchers", "Item_SolsBulwark"}
+behaviorLib.StartingItems = {"2 Item_MinorTotem", "Item_ManaBattery", "2 Item_DuckBoots"}
+behaviorLib.LaneItems = {"Item_PowerSupply", "Item_IronBuckler", "Item_GuardianRing", "Item_Marchers", "Item_SolsBulwark"}
 behaviorLib.MidItems = {"Item_EnhancedMarchers", "Item_Platemail", "Item_Warpcleft"}
-behaviorLib.LateItems = {"Item_DaemonicBreastplate", "Item_Strength6", "Item_StrengthAgility"}
+behaviorLib.LateItems = {"Item_DaemonicBreastplate", "Item_Strength6", "Item_StrengthAgility", "Item_BehemothsHeart"}
 
 --------------------------------
 -- Lanes

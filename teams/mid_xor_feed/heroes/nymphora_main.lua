@@ -49,9 +49,9 @@ local Clamp = core.Clamp
 
 BotEcho('loading nymphora_main...')
 
-behaviorLib.StartingItems = {"Item_ManaRegen3", "Item_MinorTotem"}
-behaviorLib.LaneItems = {"Item_PretendersCrown", "Item_MarkOfTheNovice", "Item_MysticVestments", "Item_Intelligence5", "Item_NomesWisdom"}
-behaviorLib.MidItems = {"Item_Striders", "Item_JadeSpire", "Item_SpellShards"}
+behaviorLib.StartingItems = {"Item_ManaRegen3", "Item_MinorTotem", "Item_MinorTotem", "Item_ManaBattery"}
+behaviorLib.LaneItems = {"Item_PowerSupply", "Item_MysticVestments", "Item_Marchers", "Item_Manatube", "Item_NomesWisdom"}
+behaviorLib.MidItems = {"Item_PlatedGreaves", "Item_BlessedArmband", "Item_LuminousPrism", "Item_Summon 3", "Item_JadeSpire"}
 behaviorLib.LateItems = {"Item_BehemothsHeart"}
 
 object.heroName = 'Hero_Fairy'
@@ -312,5 +312,26 @@ local function HarassHeroExecuteOverride(botBrain)
 end
 object.harassExecuteOld = behaviorLib.HarassHeroBehavior["Execute"]
 behaviorLib.HarassHeroBehavior["Execute"] = HarassHeroExecuteOverride
+
+local FindItemsOld = core.FindItems
+local function FindItemsFn(botBrain)
+  FindItemsOld(botBrain)
+  if object.itemPuzzle then
+    return
+  end
+  local unitSelf = core.unitSelf
+  local inventory = unitSelf:GetInventory(false)
+  if inventory ~= nil then
+    for slot = 1, 6, 1 do
+      local curItem = inventory[slot]
+      if curItem and not curItem:IsRecipe() then
+        if not object.itemPuzzle and curItem:GetName() == "Item_Summon" then
+          object.itemPuzzle = core.WrapInTable(curItem)
+        end
+      end
+    end
+  end
+end
+core.FindItems = FindItemsFn
 
 BotEcho('finished loading nymphora_main')
