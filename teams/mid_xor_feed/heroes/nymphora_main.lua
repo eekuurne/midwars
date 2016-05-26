@@ -51,8 +51,8 @@ BotEcho('loading nymphora_main...')
 
 behaviorLib.StartingItems = {"Item_ManaRegen3", "Item_MinorTotem", "Item_MinorTotem", "Item_ManaBattery"}
 behaviorLib.LaneItems = {"Item_PowerSupply", "Item_MysticVestments", "Item_Marchers", "Item_Manatube", "Item_NomesWisdom"}
-behaviorLib.MidItems = {"Item_PlatedGreaves", "Item_LuminousPrism", "Item_Summon 3", "Item_JadeSpire"}
-behaviorLib.LateItems = {"Item_BehemothsHeart", "Item_BehemothsHeart"}
+behaviorLib.MidItems = {"Item_PlatedGreaves", "Item_BlessedArmband", "Item_LuminousPrism", "Item_Summon 3", "Item_JadeSpire"}
+behaviorLib.LateItems = {"Item_BehemothsHeart"}
 
 object.heroName = 'Hero_Fairy'
 
@@ -313,11 +313,10 @@ end
 object.harassExecuteOld = behaviorLib.HarassHeroBehavior["Execute"]
 behaviorLib.HarassHeroBehavior["Execute"] = HarassHeroExecuteOverride
 
-local itemPuzzle = nil
 local FindItemsOld = core.FindItems
 local function FindItemsFn(botBrain)
   FindItemsOld(botBrain)
-  if itemPuzzle then
+  if object.itemPuzzle then
     return
   end
   local unitSelf = core.unitSelf
@@ -326,39 +325,13 @@ local function FindItemsFn(botBrain)
     for slot = 1, 6, 1 do
       local curItem = inventory[slot]
       if curItem and not curItem:IsRecipe() then
-        if not itemPuzzle and curItem:GetName() == "Item_Summon" then
-          itemPuzzle = core.WrapInTable(curItem)
+        if not object.itemPuzzle and curItem:GetName() == "Item_Summon" then
+          object.itemPuzzle = core.WrapInTable(curItem)
         end
       end
     end
   end
 end
 core.FindItems = FindItemsFn
-
-local PuzzleBoxBehavior = {}
-local function PuzzleBoxUtility(botBrain)
-  if not itemPuzzle or not itemPuzzle:CanActivate() then
-    return 0
-  end
-  local allies = core.NumberElements(core.localUnits["AllyUnits"])
-  if allies > 4 then
-    return 50
-  else
-    return 0
-  end
-end
-
-local function PuzzleBoxExecute(botBrain)
-  if itemPuzzle and itemPuzzle:CanActivate() then
-    BotEcho('Use Puzzlebox!!!')
-    bActionTaken = core.OrderItemClamp(botBrain, unitSelf, itemPuzzle)
-    return true
-  end
-  return false
-end
-PuzzleBoxBehavior["Utility"] = PuzzleBoxUtility
-PuzzleBoxBehavior["Execute"] = PuzzleBoxExecute
-PuzzleBoxBehavior["Name"] = "Puzzlebox"
-tinsert(behaviorLib.tBehaviors, PuzzleBoxBehavior)
 
 BotEcho('finished loading nymphora_main')

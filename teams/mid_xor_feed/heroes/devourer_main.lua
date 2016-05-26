@@ -15,8 +15,8 @@ object.bAbilityCommands = true
 object.bOtherCommands = true
 
 object.bReportBehavior = false
-object.bDebugUtility = true
-object.bDebugExecute = true
+object.bDebugUtility = false
+object.bDebugExecute = false
 object.bDebugEchos = false
 object.bDebugLines = false
 
@@ -99,9 +99,9 @@ function object:SkillBuild()
 end
 
 behaviorLib.StartingItems = {"2 Item_MinorTotem", "Item_ManaBattery", "Item_PowerSupply"}
-behaviorLib.LaneItems = {"Item_MysticVestments", "Item_Marchers", "Item_Strength5", "2 Item_TrinketOfRestoration"}
-behaviorLib.MidItems = {"Item_Lifetube"}
-behaviorLib.LateItems = {"Item_BehemothsHeart"}
+behaviorLib.LaneItems = {"Item_MysticVestments", "Item_Marchers", "Item_Striders", "Item_BlessedArmband", "2 Item_TrinketOfRestoration"}
+behaviorLib.MidItems = {"Item_Beastheart"}
+behaviorLib.LateItems = {"Item_LuminousPrism", "Item_Summon 3", "Item_BehemothsHeart"}
 
 ------------------------------------------------------
 --            onthink override                      --
@@ -158,11 +158,10 @@ local function CustomHarassUtilityOverride(hero)
 end
 behaviorLib.CustomHarassUtility = CustomHarassUtilityOverride
 
-local itemPK = nil
 local FindItemsOld = core.FindItems
 local function FindItemsFn(botBrain)
   FindItemsOld(botBrain)
-  if itemPK then
+  if object.itemPuzzle then
     return
   end
   local unitSelf = core.unitSelf
@@ -171,8 +170,8 @@ local function FindItemsFn(botBrain)
     for slot = 1, 6, 1 do
       local curItem = inventory[slot]
       if curItem and not curItem:IsRecipe() then
-        if not itemPK and curItem:GetName() == "Item_PortalKey" then
-          itemPK = core.WrapInTable(curItem)
+        if not object.itemPuzzle and curItem:GetName() == "Item_Summon" then
+          object.itemPuzzle = core.WrapInTable(curItem)
         end
       end
     end

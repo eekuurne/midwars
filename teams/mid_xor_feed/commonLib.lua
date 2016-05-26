@@ -384,3 +384,29 @@ KillShrineBehavior["Utility"] = KillShrineUtility
 KillShrineBehavior["Execute"] = KillShrineExecute
 KillShrineBehavior["Name"] = "Kill shrine"
 tinsert(behaviorLib.tBehaviors, KillShrineBehavior)
+
+local PuzzleBoxBehavior = {}
+local function PuzzleBoxUtility(botBrain)
+  if not object.itemPuzzle or not object.itemPuzzle:CanActivate() then
+    return 0
+  end
+  local allies = core.NumberElements(core.localUnits["AllyUnits"])
+  if allies > 4 then
+    return 50
+  else
+    return 0
+  end
+end
+
+local function PuzzleBoxExecute(botBrain)
+  if object.itemPuzzle and object.itemPuzzle:CanActivate() then
+    BotEcho('Use Puzzlebox!!!')
+    bActionTaken = core.OrderItemClamp(botBrain, unitSelf, object.itemPuzzle)
+    return true
+  end
+  return false
+end
+PuzzleBoxBehavior["Utility"] = PuzzleBoxUtility
+PuzzleBoxBehavior["Execute"] = PuzzleBoxExecute
+PuzzleBoxBehavior["Name"] = "Puzzlebox"
+tinsert(behaviorLib.tBehaviors, PuzzleBoxBehavior)

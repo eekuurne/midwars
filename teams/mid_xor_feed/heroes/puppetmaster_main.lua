@@ -52,9 +52,30 @@ BotEcho('loading puppetmaster_main...')
 object.heroName = 'Hero_PuppetMaster'
 
 behaviorLib.StartingItems = {"2 Item_MinorTotem", "Item_ManaBattery", "Item_PowerSupply"}
-behaviorLib.LaneItems = {"Item_Marchers", "Item_Intelligence5"}
-behaviorLib.MidItems = {"Item_Steamboots", "Item_WhisperingHelm"}
-behaviorLib.LateItems = {"Item_Protect", "Item_BehemothsHeart"}
+behaviorLib.LaneItems = {"Item_Marchers", "Item_Steamboots"}
+behaviorLib.MidItems = {"Item_HelmOfTheVictim", "Item_WhisperingHelm", "Item_Glowstone", "Item_Lifetube", "Item_Regen"}
+behaviorLib.LateItems = {"Item_Protect", "Item_LuminousPrism", "Item_BlessedArmband", "Item_Summon 3", "Item_BehemothsHeart"}
+
+local FindItemsOld = core.FindItems
+local function FindItemsFn(botBrain)
+  FindItemsOld(botBrain)
+  if object.itemPuzzle then
+    return
+  end
+  local unitSelf = core.unitSelf
+  local inventory = unitSelf:GetInventory(false)
+  if inventory ~= nil then
+    for slot = 1, 6, 1 do
+      local curItem = inventory[slot]
+      if curItem and not curItem:IsRecipe() then
+        if not object.itemPuzzle and curItem:GetName() == "Item_Summon" then
+          object.itemPuzzle = core.WrapInTable(curItem)
+        end
+      end
+    end
+  end
+end
+core.FindItems = FindItemsFn
 
 --------------------------------
 -- Lanes
