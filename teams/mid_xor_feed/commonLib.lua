@@ -367,7 +367,7 @@ end
 
 local function KillShrineExecute(botBrain)
   if core.enemyMainBaseStructure then
-    BotEcho("KILL SHRINE KILL SHRINE")
+    --BotEcho("KILL SHRINE KILL SHRINE")
     local range = core.unitSelf:GetAttackRange()
     local ownPos = core.unitSelf:GetPosition()
     local shrinePos = core.enemyMainBaseStructure:GetPosition()

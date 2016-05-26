@@ -1900,7 +1900,7 @@ function behaviorLib.HarassHeroUtility(botBrain)
 		local y = core.unitSelf:GetPosition().y
 		--hardcode line over which units will not chase
 		if (team == 1 and y > 11000) or (team == 2 and x < 4000) then
-			BotEcho("NOPE NOPE NOPE NOPE NOPE")
+			--BotEcho("NOPE NOPE NOPE NOPE NOPE")
 			return 0
 		end
 	end
