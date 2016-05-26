@@ -1241,8 +1241,6 @@ function behaviorLib.RetardCheckUtility(botBrain)
 	local unitSelf = core.unitSelf
 
 	if unitSelf:GetPosition() == object.lastPosition then
-		BotEcho("Hero pysyi paikallaan: ")
-		BotEcho(stayedStill)
 		object.stayedStill = object.stayedStill + 1
 	else
 		object.stayedStill = 0
@@ -1912,13 +1910,10 @@ function behaviorLib.HarassHeroUtility(botBrain)
 	--for _, enemyTower in pairs(tEnemyTowers) do
 		if unitSelf:GetLevel() == 1 then
 			nUtility = nUtility / 6
-			BotEcho("En haluakaan feedata!")
 		elseif unitSelf:GetLevel() == 2 then
 			nUtility = nUtility / 5
-			BotEcho("En haluakaan feedata!")
 		elseif unitSelf:GetLevel() == 3 then
 			nUtility = nUtility / 4
-			BotEcho("En haluakaan feedata!")
 		end
     --end
 
