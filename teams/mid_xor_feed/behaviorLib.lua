@@ -3910,7 +3910,14 @@ Current algorithm:
 			else
 				BotEcho("SHOPPING FAIL: COMPONENTS EXIST")
 				--behaviorLib.finishedBuying = true
-				return false
+				local courier = object.skills.courier
+			  BotEcho("----------------------------- Using courier ---------------------")
+			  if not courier:CanActivate() then
+			    return false
+			  end
+			  core.OrderAbility(botBrain, courier)
+
+				return true
 			end
 		end
 
@@ -3943,19 +3950,26 @@ Current algorithm:
 		behaviorLib.finishedBuying = true
 	end
 
-	if not atShop and bGoldReduced then 
-		courier = object.skills.courier
+	local emptyStashSlots = 0
+  for slot = 7, 12, 1 do
+    local curItem = tInventory[slot]
+    if not curItem then
+      emptyStashSlots = emptyStashSlots + 1
+    end
+  end
+
+	if not atShop and (bGoldReduced or emptyStashSlots < 6) then 
+		local courier = object.skills.courier
 	  BotEcho("----------------------------- Bought something ---------------------")
 	  if not courier:CanActivate() then
 	    if courierDebug then
 	      BotEcho("Cannot use courier")
 	    end
-	    return 0
+	    return false
 	  end
 	  core.OrderAbility(botBrain, courier)
 	end
 end
-
 
 behaviorLib.ShopBehavior = {}
 behaviorLib.ShopBehavior["Utility"] = behaviorLib.ShopUtility

@@ -54,7 +54,7 @@ object.heroName = 'Hero_PuppetMaster'
 behaviorLib.StartingItems = {"2 Item_MinorTotem", "Item_ManaBattery", "Item_PowerSupply"}
 behaviorLib.LaneItems = {"Item_Marchers", "Item_Steamboots"}
 behaviorLib.MidItems = {"Item_HelmOfTheVictim", "Item_WhisperingHelm", "Item_Glowstone", "Item_Lifetube", "Item_Regen"}
-behaviorLib.LateItems = {"Item_Protect", "Item_LuminousPrism", "Item_BlessedArmband", "Item_Summon 3", "Item_LifeSteal4", "Item_ManaBurn2", "Item_Beastheart", "Item_AxeOfTheMalphai", "Item_BehemothsHeart"}
+behaviorLib.LateItems = {"Item_Protect", "Item_AxeOfTheMalphai", "Item_LifeSteal4", "Item_Sicarius", "Item_Confluence", "Item_ManaBurn2", "Item_Beastheart", "Item_AxeOfTheMalphai", "Item_BehemothsHeart"}
 
 local FindItemsOld = core.FindItems
 local function FindItemsFn(botBrain)
