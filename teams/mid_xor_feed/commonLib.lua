@@ -351,18 +351,18 @@ local function KillShrineUtility(botBrain)
   if not core.enemyMainBaseStructure then 
     return 0 
   end
-  if core.enemyMainBaseStructure:GetHealthPercent() and 
+  if core.enemyMainBaseStructure:GetHealthPercent() ~= nil and 
     core.enemyMainBaseStructure:GetHealthPercent() < 1 then
-    return 0
+    local ownPos = core.unitSelf:GetPosition()
+    local shrinePos = core.enemyMainBaseStructure:GetPosition()
+    local dist2 = Vector3.Distance2DSq(ownPos, shrinePos)
+    if dist2 < 1000*1000 then
+      return 40
+    else
+      return 0
+    end
   end
-  local ownPos = core.unitSelf:GetPosition()
-  local shrinePos = core.enemyMainBaseStructure:GetPosition()
-  local dist2 = Vector3.Distance2DSq(ownPos, shrinePos)
-  if dist2 < 1000*1000 then
-    return 40
-  else
-    return 0
-  end
+  return 0
 end
 
 local function KillShrineExecute(botBrain)

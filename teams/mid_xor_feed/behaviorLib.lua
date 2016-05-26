@@ -3765,7 +3765,7 @@ function behaviorLib.ShopUtility(botBrain)
 
 	if 
 		(HoN.GetGameTime() - behaviorLib.lastShopCheck) > 10000 then
-		BotEcho(""..HoN.GetGameTime() - behaviorLib.lastShopCheck)
+		--BotEcho(""..HoN.GetGameTime() - behaviorLib.lastShopCheck)
 		behaviorLib.lastShopCheck = HoN.GetGameTime()
 		return 99
 	end

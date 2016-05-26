@@ -334,4 +334,35 @@ local function FindItemsFn(botBrain)
 end
 core.FindItems = FindItemsFn
 
+local retreatExecuteOld = behaviorLib.RetreatFromThreatExecute
+local function retreatOverride(botBrain)
+  --BotEcho("OVERRIDE RETREAT")
+  local enemyHeroes = core.localUnits["EnemyHeroes"]
+  local unitSelf = core.unitSelf
+
+  local stun = skills.stun
+  if stun and stun:CanActivate() then
+    for i,unitTarget in pairs(enemyHeroes) do
+      if Vector3.Distance2D(unitSelf:GetPosition(), unitTarget:GetPosition()) < stun:GetRange() then
+        --BotEcho("!!!!!!!!!!!!!!1 Using stun")
+        local ownPos = core.unitSelf:GetPosition()
+        local enemyPos = unitTarget:GetPosition()
+        local direction = Vector3.Normalize(enemyPos - ownPos)
+        local targetSpot = ownPos + direction * stun:GetRange()
+
+        --core.DrawXPosition(targetSpot, "yellow", 100)
+        bActionTaken = core.OrderAbilityPosition(botBrain, stun, targetSpot)
+        if nActionTaken then 
+          return true
+        end
+      end
+    end
+  end
+
+  retreatExecuteOld(botBrain)
+end
+behaviorLib.RetreatFromThreatBehavior["Name"] = "RetreatFromThreat"
+behaviorLib.RetreatFromThreatBehavior["Execute"] = retreatOverride
+tinsert(behaviorLib.tBehaviors, behaviorLib.RetreatFromThreatBehavior)
+
 BotEcho('finished loading nymphora_main')
