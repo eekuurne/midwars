@@ -53,7 +53,7 @@ object.heroName = 'Hero_Valkyrie'
 
 behaviorLib.StartingItems = {"Item_MysticPotpourri", "2 Item_MinorTotem", "Item_ManaBattery"}
 behaviorLib.LaneItems = {"Item_PowerSupply", "Item_Replenish", "Item_PretendersCrown", "Item_CrushingClaws", "Item_Strength5", "Item_Astrolabe"}
-behaviorLib.MidItems = {"Item_Marchers", "Item_EnhancedMarchers", "Item_Pierce"}
+behaviorLib.MidItems = {"Item_Marchers", "Item_EnhancedMarchers", "Item_Warhammer", "Item_Pierce 2"}
 behaviorLib.LateItems = {"Item_Immunity", "Item_BehemothsHeart"}
 
 

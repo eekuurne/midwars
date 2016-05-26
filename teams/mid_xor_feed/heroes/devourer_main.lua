@@ -99,7 +99,7 @@ function object:SkillBuild()
 end
 
 behaviorLib.StartingItems = {"2 Item_MinorTotem", "Item_ManaBattery", "Item_PowerSupply"}
-behaviorLib.LaneItems = {"Item_MysticVestments", "Item_Marchers", "Item_Striders", "Item_BlessedArmband", "2 Item_TrinketOfRestoration"}
+behaviorLib.LaneItems = {"Item_MysticVestments", "Item_Marchers", "Item_Steamboots", "Item_Lifetube", "Item_BlessedArmband", "2 Item_TrinketOfRestoration"}
 behaviorLib.MidItems = {"Item_Beastheart"}
 behaviorLib.LateItems = {"Item_LuminousPrism", "Item_Summon 3", "Item_BehemothsHeart"}
 
