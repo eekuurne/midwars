@@ -371,7 +371,11 @@ local function KillShrineExecute(botBrain)
     local ownPos = core.unitSelf:GetPosition()
     local shrinePos = core.enemyMainBaseStructure:GetPosition()
     core.DrawXPosition(shrinePos, "red", 100)
-    return core.OrderAttackClamp(botBrain, core.unitSelf, object.towerToDeny)
+    local state = core.OrderAttackClamp(botBrain, core.unitSelf, object.towerToDeny)
+    if state == false then
+      BotEcho("ASDFASDFASDFASDF")
+    end
+    return state
   end
 end
 

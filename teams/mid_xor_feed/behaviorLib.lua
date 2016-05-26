@@ -2786,13 +2786,25 @@ function behaviorLib.funcGetThreatOfEnemy(unitEnemy)
 	--BotEcho(unitEnemy:GetTypeName().." threat "..nThreat)
 	local unitSelf = core.unitSelf
 
-	if unitEnemy:GetTypeName() == "Hero_Devourer" and unitEnemy:GetPosition() and
+	if unitEnemy:GetTypeName() == "Hero_Devourer" and unitEnemy:GetPosition() and 
+		unitEnemy:GetMana() > 140 and
 		IsFreeLine(unitSelf:GetPosition(), unitEnemy:GetPosition()) then
 		--BotEcho("ExtraThreat")
 		if (unitEnemy:GetHealth() > unitSelf:GetHealth()) or 
 			core.NumberElements(core.localUnits["EnemyTowers"]) > 0 then
 			--BotEcho("================ SuperThreat ================")
-			nThreat = nThreat + 100
+			nThreat = nThreat + 10
+		end
+	end
+
+	if unitEnemy:GetTypeName() == "Hero_Valkyrie" and unitEnemy:GetPosition() and 
+		unitEnemy:GetMana() > 100 and
+		IsFreeLine(unitSelf:GetPosition(), unitEnemy:GetPosition()) then
+		--BotEcho("ExtraThreat")
+		if (unitEnemy:GetHealth() > unitSelf:GetHealth()) or 
+			core.NumberElements(core.localUnits["EnemyTowers"]) > 0 then
+			--BotEcho("================ SuperThreat ================")
+			nThreat = nThreat + 10
 		end
 	end
 
