@@ -157,11 +157,31 @@ object.oncombatevent = object.oncombateventOverride
 
 function behaviorLib.HealUtility(botBrain)
   local nUtility = 0
+  object.healPosition = nil
   if not skills.heal then return 0 end
-  if skills.heal:CanActivate() then
-    local unitSelf = core.unitSelf
-    local healthPc = unitSelf:GetHealth() / unitSelf:GetMaxHealth()
-    nUtility = 100 * (1 - healthPc)
+  local heal = skills.heal
+  local unitSelf = core.unitSelf
+  if heal:CanActivate() and unitSelf:GetHealthPercent() < 0.5 then
+    nUtility = 100 * (1 - unitSelf:GetHealthPercent())
+    object.healPosition = core.unitSelf:GetPosition()
+  elseif heal:CanActivate() then
+    local allies = core.localUnits["AllyHeroes"]
+    local enemies = core.localUnits["EnemyHeroes"]
+    if core.NumberElements(enemies) == 0 then
+      return nUtility
+    end
+    local healRange2 = heal:GetRange() * heal:GetRange()
+    local selfPos = unitSelf:GetPosition()
+    for i,ally in pairs(allies) do 
+      if ally:GetHealthPercent() < 0.5 and Vector3.Distance2DSq(ally:GetPosition(), selfPos) < healRange2 then
+        local newUtil = 100 * (1 - ally:GetHealthPercent())
+        if newUtil > nUtility then
+          BotEcho("Want to heal ally "..ally:GetTypeName())
+          object.healPosition = ally:GetPosition()
+          nUtility = newUtil
+        end
+      end
+    end
   end
 
   if object.bDebugUtility == true and nUtility ~= 0 then
@@ -173,8 +193,8 @@ end
  
 function behaviorLib.HealExecute(botBrain)
   local heal = skills.heal
-  if heal and heal:CanActivate() then
-    return core.OrderAbilityPosition(botBrain, heal, core.unitSelf:GetPosition())
+  if heal and heal:CanActivate() and object.healPosition then
+    return core.OrderAbilityPosition(botBrain, heal, object.healPosition)
   end
   return false
 end
@@ -189,11 +209,36 @@ local ManaRegenSpellBehavior = {}
 local function ManaRegenSpellUtility(botBrain)
   local nUtility = 0
   local mana = skills.mana
+  object.manaTarget = nil
+
   if not mana or mana:GetLevel() < 2 then return 0 end
-  if mana:CanActivate() and core.unitSelf:GetMana() < core.unitSelf:GetMaxMana() * 0.9
+
+
+  if mana:CanActivate() and core.unitSelf:GetMana() < core.unitSelf:GetMaxMana() * 0.2
   then
-    nUtility = 100
+    object.manaTarget = core.unitSelf
+    return 100
   end
+
+  if core.unitSelf:GetManaPercent() > 0.6 then
+    local allies = core.localUnits["AllyHeroes"]
+    local manaRange2 = mana:GetRange() * mana:GetRange()
+    local selfPos = core.unitSelf:GetPosition()
+    for i,ally in pairs(allies) do 
+      if ally:GetManaPercent() < 0.3 and Vector3.Distance2DSq(ally:GetPosition(), selfPos) < manaRange2 then
+        object.manaTarget = ally
+        return 100
+      end
+    end
+  end
+
+
+  if mana:CanActivate() and core.unitSelf:GetMana() < core.unitSelf:GetMaxMana() * 0.8
+  then
+    object.manaTarget = core.unitSelf
+    return 100
+  end
+
   if object.bDebugUtility == true and nUtility ~= 0 then
     BotEcho(format("  ManaRegenSpellUtility: %g", nUtility))
   end
