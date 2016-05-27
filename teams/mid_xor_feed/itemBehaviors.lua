@@ -585,10 +585,10 @@ function behaviorLib.UseBatterySupplyUtility(botBrain)
 		local nBatterySupplyHealthUtility = behaviorLib.BatterySupplyHealthUtilFn(nHealthMissing, nCharges)
 		local nBatterySupplyManaUtility = behaviorLib.BatterySupplyManaUtilFn(nManaMissing, nCharges)
 		
-		--[[if core.unitSelf:GetHealthPercent() < 0.6 then 
-							BotEcho("USE SUPPLY")
-							return 100
-						end]]
+		if core.unitSelf:GetHealthPercent() < 0.5 and nCharges > 0 then 
+			BotEcho("NEED SUPPLY")
+			return 1000
+		end
 
 		return max(
 			nBatterySupplyHealthUtility * .8 + nBatterySupplyManaUtility * .2, --health
@@ -607,6 +607,7 @@ function behaviorLib.UseBatterySupplyExecute(botBrain)
 	-- Use Mana Battery/Power Supply to heal
 	local itemBatterySupply = behaviorLib.GetBatterySupplyFromInventory(tInventory)
 	if itemBatterySupply:GetCharges() > 0 then
+		BotEcho("USE SUPPLY")
 		bActionTaken = core.OrderItemClamp(botBrain, unitSelf, itemBatterySupply)
 	end
 	
